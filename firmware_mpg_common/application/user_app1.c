@@ -90,7 +90,7 @@ void UserApp1Initialize(void)
  
   /* If good initialization, set state to Idle */
   if( 1 )
-  {
+  {   HEARTBEAT_ON();
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   else
@@ -144,7 +144,68 @@ static void UserApp1SM_Idle(void)
 /* Handle an error */
 static void UserApp1SM_Error(void)          
 {
+   static u32 COUNTER_LIMIT_MS=480;
+   static u32 u32Counter=0;
+   static bool blight=FALSE;
+   static u16 x=2000;
+     
+   static bool y=FALSE;
   
+   x--;
+   if(x>=0)
+   {   
+     static u8 c=5;
+     u32Counter++;
+     if(y==FALSE&&x==0)
+     {
+     COUNTER_LIMIT_MS=COUNTER_LIMIT_MS/2;
+      c--;
+        if(c==0)
+          {
+            y=!y;
+          }
+     x=2000;
+     u32Counter=0;
+     }
+     
+   
+      if(y==TRUE&&x==0)
+      {
+       COUNTER_LIMIT_MS=(2*COUNTER_LIMIT_MS);
+        c++;
+       if(c==5)
+         y=!y;
+      x=2000;
+      u32Counter=0;
+      }
+   
+   
+  if(u32Counter==COUNTER_LIMIT_MS)
+   {   
+    /*  if(x!=0)
+      {u32Counter=0;
+      }
+      else
+      {
+      u32Counter=COUNTER_LIMIT_MS+1;
+      x=10;
+      }*/
+     u32Counter=0;
+      if(blight)
+         {
+        HEARTBEAT_ON();
+     
+         }
+      else
+       {
+         HEARTBEAT_OFF();
+     
+       }
+     
+       blight=!blight;
+   }
+
+   }
 } /* end UserApp1SM_Error() */
 #endif
 
