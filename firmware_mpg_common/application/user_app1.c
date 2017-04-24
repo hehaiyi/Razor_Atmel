@@ -90,7 +90,7 @@ void UserApp1Initialize(void)
  
   /* If good initialization, set state to Idle */
   if( 1 )
-  {
+  {    HEARTBEAT_ON();
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   else
@@ -137,6 +137,63 @@ State Machine Function Definitions
 static void UserApp1SM_Idle(void)
 {
 
+   static u32 COUNTER_LIMIT_MS=480;    //�趨led��ʼ����
+   static u32 u32Counter=0;
+   static bool blight=FALSE;            //�����Ƿ�����
+   static u16 u6cycle=2000;                   //2S����
+   static bool bswitch=FALSE;           //�л�����������СledƵ��
+  
+   u6cycle--;
+    
+   
+   if(u6cycle>=0)
+   {   
+     static u8 Count=5;                  //��ʼ����Ҫ�任�Ĵ���
+     u32Counter++;
+     if(bswitch==FALSE&&u6cycle==0)         //����任����
+     {
+     COUNTER_LIMIT_MS=COUNTER_LIMIT_MS/2;    //Ƶ�ʱ�Ϊԭ��һ��
+      Count--;
+        if( Count==0)
+          {
+            bswitch=!bswitch;
+          }
+     u6cycle=2000;
+     u32Counter=0;
+     }
+     
+   
+      if(bswitch==TRUE&&u6cycle==0)         //����任����
+      {
+        Count++;
+       if( Count==5)
+       {
+         bswitch=!bswitch;
+       }
+      u6cycle=2000;
+      u32Counter=0;
+      }
+   
+ /* С�Ƶ�����*/ 
+  if(u32Counter==COUNTER_LIMIT_MS)
+   {   
+   
+     u32Counter=0;
+      if(blight)
+         {
+        HEARTBEAT_ON();
+     
+         }
+      else
+       {
+         HEARTBEAT_OFF();
+     
+       }
+     
+       blight=!blight;
+   }
+
+   }
 } /* end UserApp1SM_Idle() */
     
 #if 0
