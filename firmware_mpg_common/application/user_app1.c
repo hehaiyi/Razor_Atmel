@@ -135,46 +135,47 @@ State Machine Function Definitions
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
-{
+{/*
 
-   static u32 COUNTER_LIMIT_MS=480;    //�趨led��ʼ����
+   static u32 COUNTER_LIMIT_MS=480;    //Set led initial cycle
    static u32 u32Counter=0;
-   static bool blight=FALSE;            //�����Ƿ�����
-   static u16 u6cycle=2000;                   //2S����
-   static bool bswitch=FALSE;           //�л�����������СledƵ��
+   static bool blight=FALSE;            //Control whether the light is on
+   static u16 u16cycle=2000;                   //2SCycle
+   static bool bswitch=FALSE;           //Switching is to increase or reduce the frequency of LED
   
-   u6cycle--;
+   u16cycle--;
     
    
    if(u6cycle>=0)
    {   
-     static u8 Count=5;                  //��ʼ����Ҫ�任�Ĵ���
+     static u8 Count=5;                  //Number of times required for initialization
      u32Counter++;
-     if(bswitch==FALSE&&u6cycle==0)         //����任����
+     if(bswitch==FALSE&&u6cycle==0)         //Satisfy transformation condition
      {
-     COUNTER_LIMIT_MS=COUNTER_LIMIT_MS/2;    //Ƶ�ʱ�Ϊԭ��һ��
+     COUNTER_LIMIT_MS=COUNTER_LIMIT_MS/2;    //Frequency to the original half
       Count--;
         if( Count==0)
           {
             bswitch=!bswitch;
           }
-     u6cycle=2000;
+     u16cycle=2000;
      u32Counter=0;
      }
      
    
-      if(bswitch==TRUE&&u6cycle==0)         //����任����
+      if(bswitch==TRUE&&u6cycle==0)         //Satisfy transformation condition
       {
+       COUNTER_LIMIT_MS=2*COUNTER_LIMIT_MS;   //Double the initial value
         Count++;
        if( Count==5)
        {
          bswitch=!bswitch;
        }
-      u6cycle=2000;
+      u16cycle=2000;
       u32Counter=0;
       }
    
- /* С�Ƶ�����*/ 
+/ /С�Ƶ�����
   if(u32Counter==COUNTER_LIMIT_MS)
    {   
    
@@ -193,7 +194,60 @@ static void UserApp1SM_Idle(void)
        blight=!blight;
    }
 
-   }
+   } */
+  
+  
+    
+    {
+         {
+         HEARTBEAT_OFF();
+         
+         }
+         {
+         HEARTBEAT_ON();
+         }
+         
+         {
+         }
+    
+    }
+      
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 } /* end UserApp1SM_Idle() */
     
 #if 0
