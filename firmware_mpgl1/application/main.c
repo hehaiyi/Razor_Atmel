@@ -42,7 +42,7 @@ the 1ms period.
 void main(void)
 {
   G_u32SystemFlags |= _SYSTEM_INITIALIZING;
-
+  //  LedToggle(PURPLE);
   /* Low level initialization */
   WatchDogSetup(); /* During development, does not reset processor if timeout */
   GpioSetup();
@@ -103,9 +103,9 @@ void main(void)
     UserApp3RunActiveState();
     
     /* System sleep*/
-    //HEARTBEAT_OFF();
+    HEARTBEAT_OFF();
     SystemSleep();
-   // HEARTBEAT_ON();
+    HEARTBEAT_ON();
     
   } /* end while(1) main super loop */
   

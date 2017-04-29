@@ -90,7 +90,7 @@ void UserApp1Initialize(void)
  
   /* If good initialization, set state to Idle */
   if( 1 )
-  {    HEARTBEAT_ON();
+  {   
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   else
@@ -98,6 +98,21 @@ void UserApp1Initialize(void)
     /* The task isn't properly initialized, so shut it down and don't run */
     UserApp1_StateMachine = UserApp1SM_FailedInit;
   }
+   
+/* All discrete LEDs to off */
+  LedOff(WHITE);
+  LedOff(PURPLE);
+  LedOff(BLUE);
+  LedOff(CYAN);
+  LedOff(GREEN);
+  LedOff(YELLOW);
+  LedOff(ORANGE);
+  LedOff(RED);
+  
+  /* Backlight to white */  
+  LedOn(LCD_RED);
+  LedOn(LCD_GREEN);
+  LedOn(LCD_BLUE);
 
 } /* end UserApp1Initialize() */
 
@@ -136,7 +151,69 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+     static u8 u8Counter=0;
+     static u16 u16BlinkCount;
+     
+     u16BlinkCount++;
+     if(u16BlinkCount==500)
+     {
+     u8Counter++;
+     u16BlinkCount=0;
+     if(u8Counter==16)
+     {
+         u8Counter=0;
+     }
+     /* renew 4 LED's status           */
+   if(u8Counter & 0x01)
+    {
+      LedOn(RED);
+    }
+    else
+    {
+      LedOff(RED);
+    }
 
+    if(u8Counter & 0x02)
+    {
+      LedOn(ORANGE);
+    }
+    else
+    {
+      LedOff(ORANGE);
+    }
+
+    if(u8Counter & 0x04)
+    {
+      LedOn(YELLOW);
+    }
+    else
+    {
+      LedOff(YELLOW);
+    }
+
+    if(u8Counter & 0x08)
+    {
+      LedOn(GREEN);
+    }
+    else
+    {
+      LedOff(GREEN);
+    }
+
+     
+     
+     //
+     
+     
+}
+  
+  
+  
+  
+  
+  
+  
+  /*
    static u32 COUNTER_LIMIT_MS=480;    //�趨led��ʼ����
    static u32 u32Counter=0;
    static bool blight=FALSE;            //�����Ƿ�����
@@ -174,7 +251,7 @@ static void UserApp1SM_Idle(void)
       u32Counter=0;
       }
    
- /* С�Ƶ�����*/ 
+ 
   if(u32Counter==COUNTER_LIMIT_MS)
    {   
    
@@ -193,7 +270,19 @@ static void UserApp1SM_Idle(void)
        blight=!blight;
    }
 
-   }
+   }*/
+  
+  
+   
+  /* static u32 u32Counter;
+   u32Counter++;
+     
+     if(u32Counter==500)
+   {   
+   
+     u32Counter=0;
+     LedOn(PURPLE);
+   }*/
 } /* end UserApp1SM_Idle() */
     
 #if 0
