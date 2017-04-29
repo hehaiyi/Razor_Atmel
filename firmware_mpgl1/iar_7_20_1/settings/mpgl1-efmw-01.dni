@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=-204815796
+Checksum=735008401
 [JLinkDriver]
 CStepIntDis=_ 0
 WatchCond=_ 0
@@ -45,6 +45,15 @@ ActionState=1
 Enabled=_ 0
 [watch_formats]
 Fmt0={W}3:UserApp_u8AdcResultCount	3	0
+Fmt1={W}3:i	3	0
+Fmt2={W}3:tempButtonValue	3	0
+Fmt3={W}3:u8ButtonValue	3	0
+Fmt4={W}3:u8ButtonValue1	3	0
+Fmt5={W}3:u8Counter	3	0
+Fmt6={W}3:u8Index	3	0
+Fmt7={W}3:u8InputPassWord[0]	3	0
+Fmt8={W}3:u8InputPassWord[u8Counter]	3	0
+Fmt9={W}3:u8isPassword	3	0
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -64,7 +73,8 @@ Exclusions=
 mode=0
 [Breakpoints2]
 Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\firmware_mpg_common\drivers\adc12.c}.317.3" 0 0 1 "" 0 "" 0
-Count=1
+Bp1=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\firmware_mpg_common\application\user_app1.c}.332.1" 0 0 1 "" 0 "" 0
+Count=2
 [Aliases]
 Count=0
 SuppressDialog=0
