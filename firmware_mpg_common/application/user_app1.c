@@ -144,7 +144,7 @@ static void UserApp1SM_Idle(void)
 /* Handle an error */
 static void UserApp1SM_Error(void)          
 {
-   static u32 COUNTER_LIMIT_MS=480;
+  /* static u32 COUNTER_LIMIT_MS=480;
    static u32 u32Counter=0;
    static bool blight=FALSE;
    static u16 x=2000;
@@ -182,14 +182,7 @@ static void UserApp1SM_Error(void)
    
   if(u32Counter==COUNTER_LIMIT_MS)
    {   
-    /*  if(x!=0)
-      {u32Counter=0;
-      }
-      else
-      {
-      u32Counter=COUNTER_LIMIT_MS+1;
-      x=10;
-      }*/
+   
      u32Counter=0;
       if(blight)
          {
@@ -204,9 +197,40 @@ static void UserApp1SM_Error(void)
      
        blight=!blight;
    }
-
-   }
-} /* end UserApp1SM_Error() */
+*/
+  
+   static  u8 u8Cycle100ms =100;        //100ms cycle
+     static  u8 u8Couter=0;
+     static  u8 u8Dutycycle=0;            //adjust Duttycycle
+    u8Cycle100ms--;
+    u8Couter++;
+        
+    if(u8Cycle100ms>=0)
+    {
+         if(u8Couter==u8Dutycycle)        //judge OFF or ON
+         {
+         HEARTBEAT_OFF();                 
+         
+         }
+         if(u8Couter==10)                  //end a cycle and begin next 10ms
+         {
+         HEARTBEAT_ON();
+         u8Couter=0;
+         }
+         
+         if(u8Cycle100ms==0)               //begin next 100ms
+         {
+         u8Couter=0;
+         u8Cycle100ms=100;
+         u8Dutycycle++;
+         u8Dutycycle=u8Dutycycle%10;
+         }
+    
+    }
+  
+  
+ }
+ /* end UserApp1SM_Error() */
 #endif
 
 
