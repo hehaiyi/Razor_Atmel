@@ -93,7 +93,7 @@ void UserApp1Initialize(void)
     LedOff(ORANGE);
     LedOff(WHITE);
     LedOff(ORANGE);
-    LedOff(RED);
+    LedOn(RED);
     LedOff(CYAN);
     
   /* If good initialization, set state to Idle */
@@ -149,33 +149,36 @@ static u8 GetButton()
     u8 u8ButtonValue=9;
     if(WasButtonPressed(BUTTON0))
     { ButtonAcknowledge(BUTTON0);
-      LedOn(RED);
-    // LedToggle(RED);
+   
+      
      u8ButtonValue=1;
-     return u8ButtonValue;
+   
     }
+    
+    
     if(WasButtonPressed(BUTTON1))
     { ButtonAcknowledge(BUTTON1);
-     LedOn(RED);
-    //  LedToggle(RED);
-      u8ButtonValue=2;
    
     
-    }
+      u8ButtonValue=2;
+     }
+   
+   
     if(WasButtonPressed(BUTTON2))
     {ButtonAcknowledge(BUTTON2);
-     LedOn(RED);
-    //  LedToggle(RED);
+   
       u8ButtonValue=3;
+          
+    }
     
-    }
-    if(WasButtonPressed(BUTTON3))   
+    
+   if(WasButtonPressed(BUTTON3))   
     {ButtonAcknowledge(BUTTON3);
-      LedOn(RED);
-    //  LedToggle(RED);
-       u8ButtonValue=4;    
+     
+   
+   //    u8ButtonValue=4;    
   
-    }
+   }
     
     return u8ButtonValue;
     
@@ -183,147 +186,138 @@ static u8 GetButton()
 
 
 static void UserApp1SM_Idle(void)
-{   static u8 u8Counter=0;
-     static u8 u8InputPassWord[]={9,9,9,9,9,9};
-     u8 u8RealPassWord[]={2,2,3,3,4,4};
-     u8 u8Index;
-     u8 u8isPassword=1;
-    
+{    static u8 u8Counter=0;                                   //The rank of Password
+     static u8 u8InputPassWord[]={9,9,9,9,9,9,9,9,9,9,9};    //The Input Password
+     static u8 u8RealPassWord[]={1,1,1,2,2,2,3,3,3,3};       //The real Password
+     static u16 Ledcounter=0;                                //Flicker frequency of LED     
+     static u8 u8LedblinkTime=0;                             //Flicker time of LED
+     u8 u8Index;                                              //Number of arrays
+     u8 u8isPassword=1;                                       //Password right or wrong
+     u8 TempButtonValue;                                      //The button value
      
-     u8 TempButtonValue;
-     TempButtonValue=GetButton();
+     
+     TempButtonValue=GetButton();                              //Get the button value
      if(TempButtonValue!=9)
     { 
+      
+     u8LedblinkTime=6;                                         //Set flicker time of LED
      u8InputPassWord[u8Counter]=TempButtonValue;
      u8Counter++;
-     LedOff(RED);
+      
     }
     
+    Ledcounter++;
+    if(u8InputPassWord[u8Counter-1]!=u8RealPassWord[u8Counter-1])   //If the single password is wrong
+     {   
+        if(u8LedblinkTime>0)
+         {
     
+            if(Ledcounter%200==0)
+              { 
+                Ledcounter=0;
+                LedToggle(RED);
+                 u8LedblinkTime--;
+              }
+  
+          }
+       if(u8LedblinkTime==0)                                         //After prompt error
+        {   
+     u8Counter--;                                                     //Back to last single password until it right
+        }
+     }
    
-    if(u8Counter==6) 
-   {     
-     for(u8Index=0;u8Index<6;u8Index++)
+   if(u8InputPassWord[u8Counter-1]==u8RealPassWord[u8Counter-1])     //If the single password is right
      {
-       if(u8InputPassWord[u8Index]!=u8RealPassWord[u8Index])
+        if(u8LedblinkTime>0)
+         {
+    
+            if(Ledcounter%200==0)
+              { 
+                Ledcounter=0;
+                LedToggle(GREEN);
+                 u8LedblinkTime--;
+              }
+  
+          }
+        
+     }
+     
+    
+    
+    
+     if(u8Counter==10&&IsButtonPressed(BUTTON3))                      //If 10 password all clear and press button3
+   {     
+     for(u8Index=0;u8Index<10;u8Index++)                              //Check all the password
+     {
+       if(u8InputPassWord[u8Index]!=u8RealPassWord[u8Index])          //If one of the password is wrong
        {
           u8isPassword=0;
-          break;
+          break;                                                      //Jump out loop
          
        }
      }
-       if(u8isPassword) 
+       if(u8isPassword)                                               //Password is right
           {
             LedOn(WHITE);
             LedOff(PURPLE);
+            LedOff(RED);
           }
-          else
+          else                                                        //Password is wrong
            {
            LedOn(PURPLE);
            LedOff(WHITE);
            }
      
-        u8Counter=0;
+        u8Counter=0;                                                   //The rank of intput password zero
      
    }
   
   
-
-  
-  
-  
-  
-  
- /* static bool blight=TRUE;
-       if(WasButtonPressed(BUTTON0))
-      {   ButtonAcknowledge(BUTTON0);
-        if(blight)
-          { 
-            LedOn(BLUE);
-          }
-          else
-          {
-            LedOff(BLUE);
-          }
-      
-          blight=!blight;
-        
-      }
-  */
-  
-  /*  
-  u8 u8ButtonValue;
-    if(IsButtonPressed(BUTTON0))
-    {
-      u8ButtonValue=0;
-    }
-    if(IsButtonPressed(BUTTON1))
-    {
-      u8ButtonValue=1;
-    }
-    if(IsButtonPressed(BUTTON2))
-    {
-      u8ButtonValue=2;
-    }
-    if(IsButtonPressed(BUTTON3))   
-    {
-       u8ButtonValue=3;    
-    }
-   */ 
-  
-  
- /* u8 i;
-  i= GetButton();
    
-    switch(i)
-    {  case 0:
-         LedOn(WHITE);
-         break;
-       case 1:
-         LedOn(PURPLE);
-         break;
-       case 2:
-         LedOn(RED);
-         break;
-       case 3:
-         LedOff(WHITE);
-         LedOff(RED);
-         LedOff(PURPLE);
-         break;
-    }
+   
+  
+  
+  
+  
 
-  */
   
-  
- /* 
-    if(WasButtonPressed(BUTTON0))
-    {
-      ButtonAcknowledge(BUTTON0);
-      LedOn(WHITE);
-    }
-    
-    if(WasButtonPressed(BUTTON1))
-    { 
-      ButtonAcknowledge(BUTTON1);
-      LedOn(PURPLE);
-    }
-    
-    if(WasButtonPressed(BUTTON2))
-    { 
-    ButtonAcknowledge(BUTTON2);  
-    LedOn(RED);
-    }
-    
-    if(WasButtonPressed(BUTTON3))
-    {
-    ButtonAcknowledge(BUTTON3);
-    LedOff(WHITE);
-    LedOff(RED);
-    LedOff(PURPLE);
-    }
-   */
 } /* end UserApp1SM_Idle() */
+
+/*
+static void UserApp1_SetPassword()
+{
+
+if(IsButtonHeld(BUTTON3,1000))
+   {   
+         
+    y=0;
+    LedOn(GREEN);
+   
     
+
+        if(y<10)
+          { 
+            u8FixPassWord=GetButton();
+            u8RealPassWord[y]=u8FixPassWord;
+            y++;
+            
+          }        
+   }       
+   if(y<10)
+   {      if(Ledcounter%200==0)
+              { 
+                Ledcounter=0;
+                LedToggle(RED);
+                LedToggle(GREEN);
+                 
+              }
+   }       
+
+}
+
+*/
+
+
 #if 0
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
