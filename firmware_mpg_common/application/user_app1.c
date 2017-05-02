@@ -58,6 +58,8 @@ Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
+static u8 u8RealPassWord[]={1,1,1,2,2,2,3,3,3,3};       //The real Password
+
 //static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
 
 
@@ -98,13 +100,15 @@ void UserApp1Initialize(void)
     
   /* If good initialization, set state to Idle */
   if( 1 )
-  {    
+  {  
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   else
   {
     /* The task isn't properly initialized, so shut it down and don't run */
     UserApp1_StateMachine = UserApp1SM_FailedInit;
+   
+    
   }
 
 } /* end UserApp1Initialize() */
@@ -143,71 +147,63 @@ State Machine Function Definitions
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for ??? */
   
-static u8 GetButton()
+static u8 GetButton()                                                           //Get botton value
 {  
   
     u8 u8ButtonValue=9;
     if(WasButtonPressed(BUTTON0))
     { ButtonAcknowledge(BUTTON0);
-   
-      
-     u8ButtonValue=1;
-   
-    }
+      u8ButtonValue=1;
+     }
     
     
     if(WasButtonPressed(BUTTON1))
-    { ButtonAcknowledge(BUTTON1);
-   
-    
+    { 
+      ButtonAcknowledge(BUTTON1);
       u8ButtonValue=2;
      }
    
    
     if(WasButtonPressed(BUTTON2))
-    {ButtonAcknowledge(BUTTON2);
-   
+    {
+      ButtonAcknowledge(BUTTON2);
       u8ButtonValue=3;
-          
-    }
+     }
     
     
    if(WasButtonPressed(BUTTON3))   
-    {ButtonAcknowledge(BUTTON3);
-     
-   
-   //    u8ButtonValue=4;    
-  
-   }
+    {
+      ButtonAcknowledge(BUTTON3); 
+    }
     
     return u8ButtonValue;
     
 }
 
+static bool bModeofLock=FALSE;                                                 //Switching mode that Input or Revise               
 
 static void UserApp1SM_Idle(void)
-{    static u8 u8Counter=0;                                   //The rank of Password
-     static u8 u8InputPassWord[]={9,9,9,9,9,9,9,9,9,9,9};    //The Input Password
-     static u8 u8RealPassWord[]={1,1,1,2,2,2,3,3,3,3};       //The real Password
-     static u16 Ledcounter=0;                                //Flicker frequency of LED     
-     static u8 u8LedblinkTime=0;                             //Flicker time of LED
-     u8 u8Index;                                              //Number of arrays
-     u8 u8isPassword=1;                                       //Password right or wrong
-     u8 TempButtonValue;                                      //The button value
+{    static u8 u8Counter=0;                                                    //The rank of Password
+     static u8 u8InputPassWord[]={9,9,9,9,9,9,9,9,9,9,9};                      //The Input Password
+     static u16 Ledcounter=0;                                                  //Flicker frequency of LED     
+     static u8 u8LedblinkTime=0;                                               //Flicker time of LED
+     u8 u8Index;                                                                //Number of arrays
+     u8 u8isPassword=1;                                                         //Password right or wrong
+     u8 TempButtonValue;                                                        //The button value
      
      
-     TempButtonValue=GetButton();                              //Get the button value
-     if(TempButtonValue!=9)
-    { 
-      
-     u8LedblinkTime=6;                                         //Set flicker time of LED
-     u8InputPassWord[u8Counter]=TempButtonValue;
-     u8Counter++;
-      
-    }
+     
+  if(!bModeofLock)   
+ {   TempButtonValue=GetButton();                                               //Get the button value
+       if(TempButtonValue!=9)
+      {  
+      u8LedblinkTime=6;                                                         //Set flicker time of LED
+      u8InputPassWord[u8Counter]=TempButtonValue;
+      u8Counter++;
+      }
     
     Ledcounter++;
-    if(u8InputPassWord[u8Counter-1]!=u8RealPassWord[u8Counter-1])   //If the single password is wrong
+    if(u8InputPassWord[u8Counter-1]!=u8RealPassWord[u8Counter-1])               //If the single password is wrong
      {   
         if(u8LedblinkTime>0)
          {
@@ -216,26 +212,25 @@ static void UserApp1SM_Idle(void)
               { 
                 Ledcounter=0;
                 LedToggle(RED);
-                 u8LedblinkTime--;
+                u8LedblinkTime--;
               }
   
           }
-       if(u8LedblinkTime==0)                                         //After prompt error
-        {   
-     u8Counter--;                                                     //Back to last single password until it right
-        }
+            if(u8LedblinkTime==0)                                               //After prompt error
+             {   
+               u8Counter--;                                                     //Back to last single password until it right
+              }
      }
    
-   if(u8InputPassWord[u8Counter-1]==u8RealPassWord[u8Counter-1])     //If the single password is right
+   if(u8InputPassWord[u8Counter-1]==u8RealPassWord[u8Counter-1])                //If the single password is right
      {
         if(u8LedblinkTime>0)
          {
-    
             if(Ledcounter%200==0)
               { 
                 Ledcounter=0;
                 LedToggle(GREEN);
-                 u8LedblinkTime--;
+                u8LedblinkTime--;
               }
   
           }
@@ -244,78 +239,100 @@ static void UserApp1SM_Idle(void)
      
     
     
-    
-     if(u8Counter==10&&IsButtonPressed(BUTTON3))                      //If 10 password all clear and press button3
+         
+     if(u8Counter==10&&IsButtonPressed(BUTTON3))                                //If 10 password all clear and press button3
    {     
-     for(u8Index=0;u8Index<10;u8Index++)                              //Check all the password
+     for(u8Index=0;u8Index<10;u8Index++)                                        //Check all the password
      {
-       if(u8InputPassWord[u8Index]!=u8RealPassWord[u8Index])          //If one of the password is wrong
+       if(u8InputPassWord[u8Index]!=u8RealPassWord[u8Index])                    //If one of the password is wrong
        {
           u8isPassword=0;
-          break;                                                      //Jump out loop
+          break;                                                                //Jump out loop
          
-       }
-     }
-       if(u8isPassword)                                               //Password is right
-          {
-            LedOn(WHITE);
-            LedOff(PURPLE);
-            LedOff(RED);
-          }
-          else                                                        //Password is wrong
-           {
-           LedOn(PURPLE);
-           LedOff(WHITE);
-           }
+        }
+      }
+          if(u8isPassword)                                                      //Password is right
+            {
+             LedOn(GREEN);
+           
+             LedOff(RED);
+            }
+           else                                                                 //Password is wrong
+            {
+              LedOn(RED);
+          
+            }
      
-        u8Counter=0;                                                   //The rank of intput password zero
+        u8Counter=0;                                                            //The rank of intput password zero
      
-   }
+    }
   
   
+ }  
+ else   
+ {
+    UserApp1_SetPassword();
+ }
    
    
+   if(IsButtonHeld(BUTTON3,1000))                                               //Press the button3 to enter revise status
+    {       
+       bModeofLock=!bModeofLock;                                       
+    }
   
-  
+   
+    
+    
+    
   
   
 
   
 } /* end UserApp1SM_Idle() */
 
-/*
-static void UserApp1_SetPassword()
-{
 
-if(IsButtonHeld(BUTTON3,1000))
-   {   
-         
-    y=0;
-    LedOn(GREEN);
-   
-    
+static void UserApp1_SetPassword(void)                                        //The function of altering Password
+{ 
+  
+  static u8 u8NumberofRevise=0;
+  static u8 u8Ledcounter1=0;                                                    //LED timer++
+  u8 u8FixPassWord;                                                             //The number was replaced
+  
+         u8Ledcounter1++;                                               
 
-        if(y<10)
+         if(u8NumberofRevise<10)                                                      
           { 
             u8FixPassWord=GetButton();
-            u8RealPassWord[y]=u8FixPassWord;
-            y++;
-            
-          }        
-   }       
-   if(y<10)
-   {      if(Ledcounter%200==0)
+            if(u8FixPassWord!=9)
+            {
+              u8RealPassWord[u8NumberofRevise]=u8FixPassWord;                   //Replace the Password
+              u8NumberofRevise++;
+            }
+          }
+        
+         if(u8NumberofRevise<10)                                                //About Led
+        {      
+         if(u8Ledcounter1%200==0)
               { 
-                Ledcounter=0;
+                u8Ledcounter1=0;
                 LedToggle(RED);
                 LedToggle(GREEN);
                  
               }
-   }       
-
+         } 
+        else                                                                   //Finish revise Password
+         {
+           LedOff(GREEN); 
+           LedOn(RED);
+           u8NumberofRevise=0;
+           bModeofLock=!bModeofLock;                                            //Change the status to Input
+         }
+       
+   
+     
 }
 
-*/
+
 
 
 #if 0
