@@ -55,7 +55,7 @@ void UserApp1RunActiveState(void);
 State Machine Declarations
 ***********************************************************************************************************************/
 static void UserApp1SM_Idle(void);    
-
+static u8 GetKeyValue(void);
 static void UserApp1SM_Error(void);         
 static void UserApp1SM_FailedInit(void);        
 

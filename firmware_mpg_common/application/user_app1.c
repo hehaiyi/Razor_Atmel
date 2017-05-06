@@ -51,8 +51,8 @@ extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
 
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
 extern volatile u32 G_u32SystemTime1s;                 /* From board-specific source file */
-
-
+extern u8 G_au8DebugScanfBuffer[];
+extern u8 G_u8DebugScanfCharCount;
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_" and be declared as static.
@@ -85,6 +85,9 @@ Requires:
 Promises:
   - 
 */
+
+
+
 void UserApp1Initialize(void)
 {
  
@@ -131,17 +134,102 @@ void UserApp1RunActiveState(void)
 /**********************************************************************************************************************
 State Machine Function Definitions
 **********************************************************************************************************************/
+static u8 GetKeyValue(void)
+{
+   u8 Buttonvalue=9;
+   if(WasButtonPressed(BUTTON0))
+   { 
+     ButtonAcknowledge(BUTTON0);
+     Buttonvalue=1;
+   }
+    if(WasButtonPressed(BUTTON1))
+   { 
+      ButtonAcknowledge(BUTTON1);
+      Buttonvalue=2;
+   }
+    if(WasButtonPressed(BUTTON2))
+   { 
+     ButtonAcknowledge(BUTTON2);
+     Buttonvalue=3;
+   }
+    if(WasButtonPressed(BUTTON3))
+   { 
+     ButtonAcknowledge(BUTTON3);
+     Buttonvalue=4;
+   }
 
+return Buttonvalue;
+
+
+
+}
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for ??? */
-static void UserApp1SM_Idle(void)
-{
+                     
 
+static void UserApp1SM_Idle(void)
+{/*
+   u8 u8InputData[11];
+   u8 u8Datacount=0;
+   u8 u8StringInfor[]="\r\n\************************"
   
+  if(G_u8DebugScanfCharCount==10)
+  {
+     u8DataCount=DebugScanf(u8InputData);
+     DebugPrintf(u8StringInfor);
+     DebugPrintf("the data count is:")
+     DebugPrintNumber(u8DataCount);
+     DebugPrintf("\r\n");
+     DebugPrintf("What you innput");
+     u8InputData[10]="\0"
+     DebugPrintf(u8InputData);
+     Debuglinefeed();
+  
+  }
+  
+  */
+  
+  
+  
+  
+  static u8 u8InputNumber=0;
+  // u8 u8Array[100];
+   u8InputNumber=DebugScanf(G_au8DebugScanfBuffer);
+ 
+   
+   switch(u8InputNumber)
+   {
+   case 1:
+          LedOn(BLUE);
+          break;
+   case 2:
+          LedOn(PURPLE);
+          break;
+   case 3:
+          LedOff(BLUE);
+          LedOff(PURPLE);
+          break;
+   case 4:
+          LedOn(BLUE);
+          LedOn(PURPLE);
+          break;
+   
+   }
+ 
+   
+   
+  
+  
+  /*u8 u8KeyValue=GetKeyValue();
+ 
+  if(u8KeyValue!=9)
+  {
+     DebugPrintNumber(u8KeyValue);
+  }*/
 } /* end UserApp1SM_Idle() */
     
 #if 0
-/*-------------------------------------------------------------------------------------------------------------------*/
+/*------------------------------d-------------------------------------------------------------------------------------*/
 /* Handle an error */
 static void UserApp1SM_Error(void)          
 {

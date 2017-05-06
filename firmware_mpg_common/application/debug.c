@@ -291,7 +291,7 @@ u8 DebugScanf(u8* au8Buffer_)
     G_au8DebugScanfBuffer[i] = '\0';
   }
   
-  G_u8DebugScanfCharCount = 0;
+ // G_u8DebugScanfCharCount = 0;
   return u8Temp;
   
 } /* end DebugScanf() */
