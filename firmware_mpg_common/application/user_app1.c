@@ -192,12 +192,12 @@ static void UserApp1SM_Idle(void)
   
   
   
-  static u8 u8InputNumber=0;
-  // u8 u8Array[100];
-   u8InputNumber=DebugScanf(G_au8DebugScanfBuffer);
+   static u8 u8InputNumber=0;
+   u8 u8Array[10];
+   u8InputNumber=DebugScanf(u8Array);//G_au8DebugScanfBuffer
  
    
-   switch(u8InputNumber)
+   switch(u8Array[0])
    {
    case 1:
           LedOn(BLUE);
