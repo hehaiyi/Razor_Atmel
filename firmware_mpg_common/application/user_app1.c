@@ -145,7 +145,7 @@ State Machine Function Definitions
 
   
 static u8 GetButton(void)
-{  u8 u8ButtonValue;
+{  u8 u8ButtonValue=9;
     if(IsButtonPressed(BUTTON0))
     { 
       LedOn(RED);
