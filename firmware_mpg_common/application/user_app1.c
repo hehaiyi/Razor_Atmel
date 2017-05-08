@@ -51,7 +51,8 @@ extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
 
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
 extern volatile u32 G_u32SystemTime1s;                 /* From board-specific source file */
-
+extern u8 G_au8DebugScanfBuffer[];
+extern u8 G_u8DebugScanfCharCount;
 
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
@@ -136,7 +137,76 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+  u8 u8RealName[5]={'h','a','i','y','i'};                           /*My real Name*/
+  u8 u8InputName[10];                                               /*Input Name*/
+  static u8 u8AppearNameCount=0;                                   /*Frequency of my name appear*/
+  static u8 u8NameLetterCorrectOrderAppearCount=0;                 /*Frequency of every letter appear */                              
+  static u8 u8RiseMarkNumber=10;                                   /*Sign of increase the mark number*/                                  
+  static u8 u8MarkNumber=3;                                        /*Original number of mark */
+  static u8 u8PositionOfRealNameArrray=0;                          /*Position of the Array */
+  
+  if(G_u8DebugScanfCharCount==1)                                    /*Each letter Input*/
+   {    
+     DebugScanf(u8InputName);                                       /*Reset G_u8DebugScanfCharCount and Put the letter into the u8InputName[0]*/
+     if(u8InputName[0]==u8RealName[u8PositionOfRealNameArrray])     /*Match the first letter */
+     { 
+        u8NameLetterCorrectOrderAppearCount++;                       /*Number of letter successful comparison increase*/
+        u8PositionOfRealNameArrray++;                                /*Turn to next letter will be match*/              
+      }
+      else                                                           /*Faild match*/
+      {     
+        u8PositionOfRealNameArrray=0;                                 
+        u8NameLetterCorrectOrderAppearCount=0;                      
+        if(u8InputName[0]=u8RealName[u8PositionOfRealNameArrray])     /*avoid two top letter close togerther*/
+         {
+            u8PositionOfRealNameArrray++;
+            u8NameLetterCorrectOrderAppearCount++;
+          }
+        else
+         {
+           u8PositionOfRealNameArrray=0;
+           u8NameLetterCorrectOrderAppearCount=0;
+         }
+      }
+    }
+    
+   if(u8NameLetterCorrectOrderAppearCount==5)                         /*Reach the matching number*/
+     {  
+       u8NameLetterCorrectOrderAppearCount=0;
+       u8AppearNameCount++;                                          /*Number of Name appear ++*/
+       u8PositionOfRealNameArrray=0;                                  
+        
+       if(u8AppearNameCount==u8RiseMarkNumber)                       /*Figures increase than the number of mark increase*/
+         {
+            u8MarkNumber++;
+            u8RiseMarkNumber=10*u8RiseMarkNumber;
+         }
+        
+        DebugLineFeed();                                                /*Show the number name appear*/
+        for(u8 u8MarkCount=0;u8MarkCount<u8MarkNumber;u8MarkCount++)
+        {
+          DebugPrintf("*");
+        }
+        DebugLineFeed();
+        DebugPrintf("*");
+        DebugPrintNumber(u8AppearNameCount);
+        DebugPrintf("*");
+        DebugLineFeed();
+        for(u8 u8MarkCount=0;u8MarkCount<u8MarkNumber;u8MarkCount++)
+        {
+          DebugPrintf("*");
+        }
+        DebugLineFeed();
+     }
+  
+    
+  
+  
+  
+  
+  
+  
+  
   
 } /* end UserApp1SM_Idle() */
     
