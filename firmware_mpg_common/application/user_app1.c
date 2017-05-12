@@ -136,7 +136,20 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+  bool IsButtonHeld(BUTTON3, 2000);
+  
+  
+  if(IsButtonHeld(BUTTON3, 2000))
+  {
+    LedBlink(GREEN, LED_1HZ)
+    LedBlink(RED, LED_1HZ)
+    
+  }
+  
+  if()
+  
+  
+  
 } /* end UserApp1SM_Idle() */
     
 #if 0
