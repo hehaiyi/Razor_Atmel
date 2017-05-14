@@ -85,9 +85,14 @@ Requires:
 Promises:
   - 
 */
+static u8 au8Myname[] = "He haiyi";
+static u8 u8Corcurposition;
+
 void UserApp1Initialize(void)
 {
- 
+  LCDCommand(LCD_HOME_CMD);  
+  u8Corcurposition=LINE1_START_ADDR;
+
   /* If good initialization, set state to Idle */
   if( 1 )
   {    
@@ -136,7 +141,24 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+   if(WasButtonPressed(BUTTON3))
+   {
+     ButtonAcknowledge(BUTTON3);
+     
+     if()
+   
+   
+   
+   
+   
+   
+   
+   }
+     
+     
+     
+     
+     
   
 } /* end UserApp1SM_Idle() */
     
