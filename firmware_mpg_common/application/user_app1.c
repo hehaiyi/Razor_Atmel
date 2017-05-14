@@ -48,7 +48,7 @@ volatile u32 G_u32UserApp1Flags;                       /* Global state flags */
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
 extern volatile u32 G_u32SystemFlags;                  /* From main.c */
 extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
-
+extern u8 G_u8DebugScanfCharCount;
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
 extern volatile u32 G_u32SystemTime1s;                 /* From board-specific source file */
 
@@ -85,14 +85,27 @@ Requires:
 Promises:
   - 
 */
-static u8 au8Myname[] = "He haiyi";
-static u8 u8Corcurposition;
+static u8 au8Myname[5];
+static u8 u8CorsurPosition=0;
 
 void UserApp1Initialize(void)
 {
-  LCDCommand(LCD_HOME_CMD);  
-  u8Corcurposition=LINE1_START_ADDR;
-
+ // LCDCommand(LCD_HOME_CMD);  
+ // u8Corcurposition=LINE1_START_ADDR;
+ /* u8 au8Message[]="hellow world";
+  LCDMessage(LINE1_START_ADDR,au8Message);
+  LCDClearChars(LINE1_START_ADDR+5,7);
+  LCDMessage(LINE2_START_ADDR,"|");
+  LCDMessage(LINE2_END_ADDR,"|");
+  LCDMessage(LINE2_START_ADDR+8,"EiE");
+  LCDCommand(LCD_DISPLAY_CMD);
+  LCDCommand(LCD_DISPLAY_CMD|LCD_DISPLAY_ON);
+  LCDCommand(LCD_DISPLAY_CMD|LCD_DISPLAY_ON|LCD_DISPLAY_CURSOR);
+  LCDCommand(LCD_DISPLAY_CMD|LCD_DISPLAY_ON|LCD_DISPLAY_CURSOR|LCD_DISPLAY_BLINK);
+  LCDCommand(LCD_HOME_CMD);
+  LCDCommand(LCD_ADDRESS_CMD|3);
+  */
+  LCDClearChars(0,20);
   /* If good initialization, set state to Idle */
   if( 1 )
   {    
@@ -140,22 +153,110 @@ State Machine Function Definitions
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
-{
-   if(WasButtonPressed(BUTTON3))
+{   u8 auArray[5]="123";
+    
+    static u8 n=0;
+    static u8 count=0;
+    count++;
+    if(count==5)
+    { count=0;
+    
+      LCDMessage(n,auArray);
+      n++;
+      LCDClearChars(0,n);
+    }
+   
+  
+  
+  
+  
+  
+  
+  /*static u8 u8Position=0;
+  if(WasButtonPressed(BUTTON0))
+  {
+    ButtonAcknowledge(BUTTON0);
+    LCDCommand(LCD_HOME_CMD);
+    LCDCommand(LCD_DISPLAY_CMD|LCD_DISPLAY_ON|LCD_DISPLAY_CURSOR|LCD_DISPLAY_BLINK);
+  
+  }
+    if(G_u8DebugScanfCharCount==1)
+    {  
+     DebugScanf(au8Myname);
+     LCDMessage(LINE1_START_ADDR+u8CorsurPosition%10,au8Myname);
+     u8Position++;
+    }
+  
+  
+  if(WasButtonPressed(BUTTON3))
    {
      ButtonAcknowledge(BUTTON3);
      
-     if()
+     if(u8CorsurPosition==LINE1_END_ADDR)
+     {
+        u8CorsurPosition=LINE2_START_ADDR;
+        
+     }
    
-   
-   
-   
-   
-   
-   
+     else if(u8CorsurPosition==LINE2_END_ADDR)
+     {
+        u8CorsurPosition=LINE1_START_ADDR;
+       
+     }
+     else
+     {
+        u8CorsurPosition++;
+     }
+    
+    LCDCommand(LCD_ADDRESS_CMD|u8CorsurPosition);
    }
      
+  if(WasButtonPressed(BUTTON2))
+  {
+     ButtonAcknowledge(BUTTON2);
      
+     if(u8CorsurPosition==LINE1_START_ADDR)
+     {
+       u8CorsurPosition=LINE2_END_ADDR;
+     }
+     else if(u8CorsurPosition==LINE2_START_ADDR)
+     {
+        u8CorsurPosition=LINE1_END_ADDR;
+     }
+     else
+     {
+        u8CorsurPosition--;
+     }
+  LCDCommand(LCD_ADDRESS_CMD|u8CorsurPosition);
+  }
+   */  
+  
+      
+      /*  if(WasButtonPressed(BUTTON1))
+    {
+        ButtonAcknowledge(BUTTON1);
+        if(u8CorsurPosition<10)
+        {
+           u8CorsurPosition=LINE2_START_ADDR+u8CorsurPosition%10;
+        }
+        if(u8CorsurPosition>=10)
+        {
+           u8CorsurPosition=LINE1_START_ADDR+u8CorsurPosition%10;
+        }
+   
+    }
+ 
+ */
+     
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+       
      
      
      
