@@ -133,7 +133,11 @@
       <WATCH_4>
         <expressions>
           
+<<<<<<< HEAD
         <item>count</item><item>n</item><item>u8 auArray[20]</item><item>auArray[0]</item><item>auArray[20]</item><item>auArray[15]</item><item>auArray[1]</item><item></item></expressions>
+=======
+        <item>count</item><item>n</item><item/></expressions>
+>>>>>>> origin/LCD
         <col-names>
           
           
