@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=830541727
+Checksum=-1911656533
 [JLinkDriver]
 CStepIntDis=_ 0
 WatchCond=_ 0
@@ -45,16 +45,14 @@ ActionState=1
 Enabled=_ 0
 [watch_formats]
 Fmt0={W}3:UserApp_u8AdcResultCount	3	0
-Fmt1={W}4:count	3	0
-Fmt2={W}4:n	3	0
-[Trace1]
-Enabled=0
-ShowSource=1
-[Disassemble mode]
-mode=0
-[Breakpoints2]
-Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\firmware_mpg_common\drivers\adc12.c}.317.3" 0 0 1 "" 0 "" 0
-Count=1
+Fmt1={W}4:auArray[0]	3	0
+Fmt2={W}4:auArray[15]	3	0
+Fmt3={W}4:auArray[1]	3	0
+Fmt4={W}4:auArray[20]	3	0
+Fmt5={W}4:count	3	0
+Fmt6={W}4:i	3	0
+Fmt7={W}4:k	3	0
+Fmt8={W}4:n	3	0
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -62,9 +60,6 @@ Category=_ 0
 [TermIOLog]
 LoggingEnabled=_ 0
 LogFile=_ ""
-[Aliases]
-Count=0
-SuppressDialog=0
 [CallStackLog]
 Enabled=0
 [DriverProfiling]
@@ -73,3 +68,11 @@ Mode=1
 Graph=0
 Symbiont=0
 Exclusions=
+[Disassemble mode]
+mode=0
+[Breakpoints2]
+Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\firmware_mpg_common\drivers\adc12.c}.317.3" 0 0 1 "" 0 "" 0
+Count=1
+[Aliases]
+Count=0
+SuppressDialog=0

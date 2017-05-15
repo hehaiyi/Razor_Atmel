@@ -85,8 +85,8 @@ Requires:
 Promises:
   - 
 */
-static u8 au8Myname[5];
-static u8 u8CorsurPosition=0;
+//static u8 au8Myname[5];
+//static u8 u8CorsurPosition=0;
 
 void UserApp1Initialize(void)
 {
@@ -153,19 +153,29 @@ State Machine Function Definitions
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
-{   u8 auArray[5]="123";
-    
-    static u8 n=0;
-    static u8 count=0;
+{ static u8 auArray[20]={'h','e','h','a','i','y','i',' '};
+  
+    static u8 n=22;
+    static u16 count=0;
     count++;
-    if(count==5)
+    if(count==500)
     { count=0;
-    
-      LCDMessage(n,auArray);
-      n++;
-      LCDClearChars(0,n);
+      LCDMessage(n-2,auArray);
+     // LCDClearChars(LINE1_START_ADDR+k,20-k);
+ //   for(u8 i=20;i>0;i--)
+  //    {
+  //     auArray[i+1]=auArray[i];
+  //    }
+     
+      n--;
+      if(n==0)
+      {
+       n=22;
+        LCDCommand(LCD_CLEAR_CMD);
+      }
     }
-   
+  
+     
   
   
   
