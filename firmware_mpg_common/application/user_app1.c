@@ -153,36 +153,37 @@ State Machine Function Definitions
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
-{ static u8 auArray[20]={'h','e','h','a','i','y','i',' '};
+{ 
   
-    static u8 n=22;
-    static u16 count=0;
-    count++;
-    if(count==500)
-    { count=0;
-      LCDMessage(n-2,auArray);
-     // LCDClearChars(LINE1_START_ADDR+k,20-k);
- //   for(u8 i=20;i>0;i--)
-  //    {
-  //     auArray[i+1]=auArray[i];
-  //    }
-     
-      n--;
-      if(n==0)
+    static u8 auArray[9]={' ','h','e','h','a','i','y','i',' '};
+    static bool bRightOrLeft=TRUE;
+    static u8 u8StepOfName=11;
+    static u16 u16MovementTntervalTime=0;
+    u16MovementTntervalTime++;
+    if(u16MovementTntervalTime==500)
+    { u16MovementTntervalTime=0;
+      if(bRightOrLeft)
       {
-       n=22;
-        LCDCommand(LCD_CLEAR_CMD);
+        LCDMessage(u8StepOfName,auArray);
+      }
+      else
+      {
+        LCDMessage(LINE1_END_ADDR-u8StepOfName-8,auArray);
+      }
+      u8StepOfName--;
+      if(u8StepOfName==0)
+      {
+       u8StepOfName=11;
+       bRightOrLeft=!bRightOrLeft;
       }
     }
   
-     
   
   
-  
-  
-  
-  
-  /*static u8 u8Position=0;
+ /* 
+  static u8 u8CorsurPosition=0;
+  static u8 au8Myname[]="hehaiyi";
+  static u8 u8Position=0;
   if(WasButtonPressed(BUTTON0))
   {
     ButtonAcknowledge(BUTTON0);
@@ -239,10 +240,10 @@ static void UserApp1SM_Idle(void)
      }
   LCDCommand(LCD_ADDRESS_CMD|u8CorsurPosition);
   }
-   */  
+     
   
       
-      /*  if(WasButtonPressed(BUTTON1))
+       if(WasButtonPressed(BUTTON1))
     {
         ButtonAcknowledge(BUTTON1);
         if(u8CorsurPosition<10)
@@ -256,7 +257,7 @@ static void UserApp1SM_Idle(void)
    
     }
  
- */
+*/
      
  
  
