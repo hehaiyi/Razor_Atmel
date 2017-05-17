@@ -178,9 +178,55 @@ static void UserApp1SM_Idle(void)
       }
     }
   
+    
+   /* 
+    static u8 auArray[20]={' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','h','e','h','a','i','y','i',' '};
+    static u8 u8StepOfName=13;
+    static u16 u16MovementTntervalTime=0;
+    u16MovementTntervalTime++;
+    if(u16MovementTntervalTime==500)
+    { u16MovementTntervalTime=0;
+      LCDMessage(LINE1_START_ADDR,auArray);
+      for(u8 i=0;i<19;i++)
+      {
+         auArray[i]=auArray[i+1];
+         
+      }
+      //u8StepOfName--;
+      auArray[19]=auArray[0];
+      
+    
+     
+      
+   //  LCDMessage(LINE1_END_ADDR-u8StepOfName-8,auArray);
+     
+  //    u8StepOfName--;
+  //    if(u8StepOfName==0)
+ //     {
+  //     u8StepOfName=11;
+   //   }
+    }
   
   
- /* 
+ */
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /* 
   static u8 u8CorsurPosition=0;
   static u8 au8Myname[]="hehaiyi";
   static u8 u8Position=0;
