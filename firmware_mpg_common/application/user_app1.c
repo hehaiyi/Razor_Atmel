@@ -155,7 +155,7 @@ State Machine Function Definitions
 static void UserApp1SM_Idle(void)
 { 
   
-    static u8 auArray[9]={' ','h','e','h','a','i','y','i',' '};
+   /* static u8 auArray[9]={' ','h','e','h','a','i','y','i',' '};
     static bool bRightOrLeft=TRUE;
     static u8 u8StepOfName=11;
     static u16 u16MovementTntervalTime=0;
@@ -177,38 +177,92 @@ static void UserApp1SM_Idle(void)
        bRightOrLeft=!bRightOrLeft;
       }
     }
-  
+  */
     
-   /* 
-    static u8 auArray[20]={' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','h','e','h','a','i','y','i',' '};
-    static u8 u8StepOfName=13;
+    
+    static u8 auArray[30]={' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','h','e','h','a','i','y','i',' ',' '};
+    static u8 auArray2[25]={' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
+    static u8 u8StepOfName=20;
     static u16 u16MovementTntervalTime=0;
+    static bool t=TRUE;
+    static bool y=FALSE;
+    static bool i=FALSE;
+    static bool k=FALSE;
+    static u8 count=27;
     u16MovementTntervalTime++;
     if(u16MovementTntervalTime==500)
     { u16MovementTntervalTime=0;
-      LCDMessage(LINE1_START_ADDR,auArray);
-      for(u8 i=0;i<19;i++)
+      
+       u8StepOfName--;
+        count--;
+       if(y)
       {
-         auArray[i]=auArray[i+1];
-         
-      }
-      //u8StepOfName--;
-      auArray[19]=auArray[0];
-      
+       auArray2[20]=auArray[0];
+       }  
+       if(k)
+       {
+        auArray[20]=auArray2[0];
+       }
+       
+       if(t)
+      {
+       
+        
+        LCDMessage(LINE1_START_ADDR,auArray);
+          for(u8 i=0;i<27;i++)
+         {
+           auArray[i]=auArray[i+1];
+          } 
     
-     
       
-   //  LCDMessage(LINE1_END_ADDR-u8StepOfName-8,auArray);
-     
-  //    u8StepOfName--;
-  //    if(u8StepOfName==0)
- //     {
-  //     u8StepOfName=11;
-   //   }
+        if(u8StepOfName==0)
+        { 
+          y=!y;
+          i=!i;
+          u8StepOfName=20;
+        }
+        if(count==0)
+        {
+          count=27;
+          t=!t;
+        }
+      }
+      
+      if(i)
+      {   
+         LCDMessage(LINE2_START_ADDR,auArray2);
+         for(u8 i=0;i<27;i++)
+         {
+            auArray2[i]=auArray2[i+1];
+         }
+    
+      
+        if(u8StepOfName==0)
+        {  
+           k=!k;  
+           t=!t;
+           u8StepOfName=20;
+        }
+         if(count==0)
+        {
+          count=27;
+          i=!i;
+        }
+      
+      
+      
+      }
+    
+        
+      
+ 
+    
+    
+    
     }
   
   
- */
+
     
     
     
