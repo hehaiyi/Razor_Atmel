@@ -78,10 +78,11 @@ Promises:
 void UserApp1Initialize(void)
 {
   u8 au8UserApp1Start1[] = "LED program task started\n\r";
-  
+  LedOff(WHITE);
   /* Turn off the Debug task command processor and announce the task is ready */
   DebugSetPassthrough();
   DebugPrintf(au8UserApp1Start1);
+  
   
     /* If good initialization, set state to Idle */
   if( 1 )
@@ -130,7 +131,49 @@ State Machine Function Definitions
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for input */
 static void UserApp1SM_Idle(void)
-{
+{ 
+  u8 aArray[1];
+  if(G_u8DebugScanfCharCount==1)
+  {
+    DebugScanf(aArray);
+    if(aArray[0]==1)
+    {
+      DebugPrintf("ww");
+      LedOn(WHITE);
+    }
+  
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+/* 
+  LedCommandType aeUserList[]=
+  {
+    {RED,0,TRUE,LED_PWM_0},
+    {YELLOW,500,TRUE,LED_PWM_0},
+    {RED,500,FALSE,LED_PWM_100},
+    {YELLOW,1000,FALSE,LED_PWM_100}
+  
+  };
+   for(u8 i = 0; i < (sizeof(aeUserList) / sizeof(LedCommandType)); i++)
+  {
+    LedDisplayAddCommand(USER_LIST, &aeUserList[i]);
+  }
+  
+ */ 
+  
+  
   
 } /* end UserApp1SM_Idle() */
                       
