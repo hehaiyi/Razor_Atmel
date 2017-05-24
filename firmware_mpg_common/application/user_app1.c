@@ -78,7 +78,6 @@ Promises:
 void UserApp1Initialize(void)
 {
   u8 au8UserApp1Start1[] = "LED program task started\n\r";
-  LedOff(WHITE);
   /* Turn off the Debug task command processor and announce the task is ready */
   DebugSetPassthrough();
   DebugPrintf(au8UserApp1Start1);
@@ -132,17 +131,97 @@ State Machine Function Definitions
 /* Wait for input */
 static void UserApp1SM_Idle(void)
 { 
-  u8 aArray[1];
-  if(G_u8DebugScanfCharCount==1)
-  {
-    DebugScanf(aArray);
-    if(aArray[0]==1)
+  static u8 auCheckProgramOrShow[1];
+  static u8 auCheckInput[1];
+  static u8 u8CountMemberNumber=0;
+  static bool bCheckProgramOrShow=TRUE;
+  static bool bBeginInputData=FALSE;
+  static LedNumberType eLED1;       /* LED to operate on */
+  u32 u32Time1;              /* Time of action */
+  bool bOn1;                 /* TRUE if this is an ON event */
+ 
+    if(!bBeginInputData)
     {
-      DebugPrintf("ww");
-      LedOn(WHITE);
+        DebugScanf(auCheckProgramOrShow);
+   
     }
+    if(auCheckProgramOrShow[0]=='1'&&bBeginInputData==FALSE)
+    {   
+        bCheckProgramOrShow=!bCheckProgramOrShow;
+        bBeginInputData=!bBeginInputData;
+    }
+      
+    if(bCheckProgramOrShow==FALSE)
+      {   
+           DebugScanf(auCheckInput);
+         
+           if(u8CountMemberNumber==0&&auCheckInput[0]!='-')
+           { 
+             if(auCheckInput[0]=='W')
+             {
+                eLED1=WHITE;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='P')
+             {
+                eLED1=PURPLE;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='B')
+             {
+                eLED1=BLUE;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='C')
+             {
+                eLED1=CYAN;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='G')
+             {
+                eLED1=GREEN;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='Y')
+             {
+                eLED1=YELLOW;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='O')
+             {
+                eLED1=ORANGE;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='R')
+             {
   
-  }
+                eLED1=RED;
+                u8CountMemberNumber++;
+             }
+             
+             if(u8CountMemberNumber==1&&auCheckInput[0]!='-')
+             {
+                
+               
+               
+               
+               
+             }
+             
+           
+           
+           }
+            
+             
+             
+             LedCommandType aeUserList[1]={eLED1,u32Time1,bOn1,LED_PWM_0};
+             for(u8 i = 0; i < (sizeof(aeUserList) / sizeof(LedCommandType)); i++)
+             {
+                LedDisplayAddCommand(USER_LIST, &aeUserList[i]);
+             }
+           
+          }
+  
   
   
   
