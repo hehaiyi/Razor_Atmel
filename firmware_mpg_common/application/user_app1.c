@@ -137,10 +137,13 @@ static void UserApp1SM_Idle(void)
   static bool bCheckProgramOrShow=TRUE;
   static bool bBeginInputData=FALSE;
   static LedNumberType eLED1;       /* LED to operate on */
-  u32 u32Time1;              /* Time of action */
-  bool bOn1;                 /* TRUE if this is an ON event */
- 
-    if(!bBeginInputData)
+  static u32 u32Time1;              /* Time of action */
+  static bool bOn1;                 /* TRUE if this is an ON event */
+  static u8 i=1;
+  LedCommandType aeUserList[200];
+  static bool u8InputTimeCount=TRUE;
+    
+  if(!bBeginInputData)
     {
         DebugScanf(auCheckProgramOrShow);
    
@@ -198,29 +201,42 @@ static void UserApp1SM_Idle(void)
                 eLED1=RED;
                 u8CountMemberNumber++;
              }
+   
              
-             if(u8CountMemberNumber==1&&auCheckInput[0]!='-')
-             {
-                
-               
-               
-               
-               
-             }
              
+             
+               if(u8InputTimeCount&&u8CountMemberNumber==1&&auCheckInput[0]!='-')
+                {
+                    u32Time1=u32Time1*10+auCheckInput[0];
+                }
+               else if(u8CountMemberNumber==1&&auCheckInput[0]=='-')
+               {
+                    u8InputTimeCount=!u8InputTimeCount;
+               }
+                 
            
            
            }
             
              
+            if(u8CountMemberNumber==3) 
+            {   
              
-             LedCommandType aeUserList[1]={eLED1,u32Time1,bOn1,LED_PWM_0};
-             for(u8 i = 0; i < (sizeof(aeUserList) / sizeof(LedCommandType)); i++)
+                aeUserList[i].eLED=eLED1;
+                aeUserList[i].u32Time=u32Time1;
+                aeUserList[i].bOn=TRUE;
+                aeUserList[i].eCurrentRate=LED_PWM_0;
+                  i++;
+                u8CountMemberNumber=0;
+            }
+            if(u8CountMemberNumber==0&&auCheckProgramOrShow[0]=='\r')
+            {
+              for(u8 i = 0; i < (sizeof(aeUserList) / sizeof(LedCommandType)); i++)
              {
                 LedDisplayAddCommand(USER_LIST, &aeUserList[i]);
              }
-           
           }
+        }
   
   
   
