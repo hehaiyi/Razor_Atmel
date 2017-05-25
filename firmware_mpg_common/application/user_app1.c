@@ -136,46 +136,56 @@ static void UserApp1SM_Idle(void)
   static u8 u8CountMemberNumber=0;
   static bool bCheckProgramOrShow=TRUE;
   static bool bBeginInputData=FALSE;
-  static LedNumberType eLED1=0;       /* LED to operate on */
-  static u32 u32OnTime=0;              /* Time of action */
+  static LedNumberType eLED1=0;       
+  static u32 u32OnTime=0;              
   static u32 u32OffTime=0;
-  static u8 i=1;
+  static u8 i=0;
   LedCommandType aeUserList[200];
-  static bool u8InputOnTimeCount=TRUE;
-  static bool u8InputOffTimeCount=TRUE;
-    
+  static bool u8InputOnTimeCount=FALSE;
+  static bool u8InputOffTimeCount=FALSE;
+  static u8 u8CountInputOnTimeNumber=0; 
+  static u8 u8CountInputOffTimeNumber=0;
 
     
   if(G_u8DebugScanfCharCount==1)
   {
-    
-      if(!bBeginInputData)
+   
+    if(!bBeginInputData)
     {
         DebugScanf(auCheckProgramOrShow);
-   
     }
-  if(auCheckProgramOrShow[0]=='1'&&bBeginInputData==FALSE)
-    {   
-        DebugPrintf("\n");
+    
+    if(auCheckProgramOrShow[0]=='1'&&bBeginInputData==FALSE)
+      {   
+        DebugPrintf("\n\r");
         bCheckProgramOrShow=!bCheckProgramOrShow;
         bBeginInputData=!bBeginInputData;
-    }
-     if(auCheckProgramOrShow[0]=='\r') 
-     {
-         DebugPrintf("\n");
-     }
-    if(bCheckProgramOrShow==FALSE)
-      {   
-           DebugScanf(auCheckInput);
-         
-           if(u8CountMemberNumber==0&&auCheckInput[0]!='-')
+      }
+    
+    
+    
+     if(u8CountMemberNumber==1)
+        {
+            u8InputOnTimeCount=TRUE;
+         }
+    
+     if(u8CountMemberNumber==2)
+        {
+           u8InputOffTimeCount=TRUE;
+        }
+        DebugScanf(auCheckInput);
+    
+    
+     if(bCheckProgramOrShow==FALSE)
+       {   
+         if(u8CountMemberNumber==0&&auCheckInput[0]!='-')
            { 
              if(auCheckInput[0]=='W')
              {
                 eLED1=WHITE;
                 u8CountMemberNumber++;
              }
-             if(auCheckInput[0]=='P')
+              else if(auCheckInput[0]=='P')
              {
                 eLED1=PURPLE;
                 u8CountMemberNumber++;
@@ -211,36 +221,41 @@ static void UserApp1SM_Idle(void)
                 eLED1=RED;
                 u8CountMemberNumber++;
              }
-   
-           }
+            }
              
-             
-               if(u8InputOnTimeCount&&u8CountMemberNumber==1&&auCheckInput[0]!='-')
+           
+           if(u8InputOnTimeCount&&auCheckInput[0]!='-')
                 {
-                    u32OnTime=(u32OnTime)*10+(auCheckInput[0]-48);
+                  LedOn(WHITE);  
+                  u32OnTime=(u32OnTime)*10+(auCheckInput[0]-48);
+                  u8CountInputOnTimeNumber++;
                 }
-               else if(u8CountMemberNumber==1&&auCheckInput[0]=='-')
-               {
+                else if(u8CountInputOnTimeNumber>0&&auCheckInput[0]=='-')
+                {
                     u8InputOnTimeCount=!u8InputOnTimeCount;
                     u8CountMemberNumber++;
-               }
-              
-             if(u8InputOffTimeCount&&u8CountMemberNumber==2&&auCheckInput[0]!='-')
+                    u8InputOnTimeCount=FALSE;
+                 }
+            
+           if(u8InputOffTimeCount&&auCheckInput[0]!='-')
                 {
-                    u32OnTime=u32OnTime*10+auCheckInput[0];
+                  LedOn(PURPLE);   
+                  u32OffTime=u32OffTime*10+(auCheckInput[0]-48);
+                    u8CountInputOffTimeNumber++;
                 }
-               else if(u8CountMemberNumber==2&&auCheckInput[0]=='-')
+               else if(u8CountInputOffTimeNumber>0&&auCheckInput[0]=='\r')
                {
                     u8InputOffTimeCount=!u8InputOffTimeCount;
                     u8CountMemberNumber++;
+                    u8InputOffTimeCount=FALSE;
                }
-                 
            
-           
-      } 
-            
-             
-            if(u8CountMemberNumber==3) 
+           if(auCheckInput[0]=='\r') 
+            {
+                LedOn(RED);
+                DebugPrintf("\n\r");
+            }
+          if(u8CountMemberNumber==2) 
             {   
              
                 aeUserList[i].eLED=eLED1;
@@ -254,13 +269,21 @@ static void UserApp1SM_Idle(void)
                 aeUserList[i].eCurrentRate=LED_PWM_100;
                 u8CountMemberNumber=0;
             }
-            if(u8CountMemberNumber==0&&auCheckProgramOrShow[0]=='\r')
+           
+         
+         if(i>0&&u8CountMemberNumber==0&&auCheckInput[0]=='\r')
             {
-              for(u8 i = 0; i < (sizeof(aeUserList) / sizeof(LedCommandType)); i++)
+              for(u8 x = 0; x < (sizeof(aeUserList) / sizeof(LedCommandType)); x++)
              {
-                LedDisplayAddCommand(USER_LIST, &aeUserList[i]);
+                LedDisplayAddCommand(USER_LIST, &aeUserList[x]);
              }
-          }
+            }   
+           
+           
+      } 
+            
+            
+           
         }
   
   
@@ -269,29 +292,29 @@ static void UserApp1SM_Idle(void)
   
   
   
+ 
   
   
   
   
   
   
-  
-  
-/* 
+ /*
+ 
   LedCommandType aeUserList[]=
   {
     {RED,0,TRUE,LED_PWM_0},
-    {YELLOW,500,TRUE,LED_PWM_0},
+    
     {RED,500,FALSE,LED_PWM_100},
-    {YELLOW,1000,FALSE,LED_PWM_100}
+  
   
   };
    for(u8 i = 0; i < (sizeof(aeUserList) / sizeof(LedCommandType)); i++)
   {
     LedDisplayAddCommand(USER_LIST, &aeUserList[i]);
   }
-  
- */ 
+  */
+ 
   
   
   
