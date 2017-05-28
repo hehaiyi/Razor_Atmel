@@ -136,7 +136,7 @@ static void UserApp1SM_Idle(void)
   static u8 u8CountMemberNumber=0;                                             /*check how many member had been input*/
   static bool bCheckProgramOrShow=TRUE;                                        /*decide input or show */
   static bool bBeginInputData=FALSE;                                           /*decide whether input */                                
-  static LedNumberType eLED1=0;                                                /*to store which Led*/     
+  static LedNumberType eLED1;                                                /*to store which Led*/     
   static u32 u32OnTime=0;                                                      /*to store On time*/ 
   static u32 u32OffTime=0;                                                     /*to store Off time*/
   static u8 u8NumberOfUserList=0;                                                                                          
@@ -150,22 +150,29 @@ static void UserApp1SM_Idle(void)
   if(G_u8DebugScanfCharCount==1)
   {
    
-    if(!bBeginInputData)
-    {
-        DebugScanf(auCheckProgramOrShow);
-    }
-    
-    if(auCheckProgramOrShow[0]=='1'&&bBeginInputData==FALSE)
-      {   
-        DebugPrintf("\n\r");
-        bCheckProgramOrShow=!bCheckProgramOrShow;
-        bBeginInputData=!bBeginInputData;
-      }
-    
-    
-    
-     if(u8CountMemberNumber==1&&!u8InputOnTimeCount)
+      if(!bBeginInputData)
         {
+          DebugScanf(auCheckProgramOrShow);
+        }
+    
+      if(auCheckProgramOrShow[0]=='1'&&bBeginInputData==FALSE)
+        {   
+          DebugPrintf("\n\r");
+          bCheckProgramOrShow=!bCheckProgramOrShow;
+          bBeginInputData=!bBeginInputData;
+        }
+      
+      if(auCheckProgramOrShow[0]=='3'&&bBeginInputData==TRUE)
+        {   
+          DebugPrintf("\n\r");
+          bCheckProgramOrShow=!bCheckProgramOrShow;
+          bBeginInputData=!bBeginInputData;
+        }
+    
+    
+    
+       if(u8CountMemberNumber==1&&!u8InputOnTimeCount)
+         {
             u8InputOnTimeCount=TRUE;
             u32OnTime=0;
             u8CountInputOnTimeNumber=0;
@@ -229,26 +236,26 @@ static void UserApp1SM_Idle(void)
              
            /*input the on time*/
            if(u8InputOnTimeCount&&auCheckInput[0]!='-')
-                {
-                  u32OnTime=u32OnTime*10+(auCheckInput[0]-48);
-                  u8CountInputOnTimeNumber++;
-                }
-                else if(u8CountInputOnTimeNumber>0&&auCheckInput[0]=='-')
-                {
-                    u8InputOnTimeCount=!u8InputOnTimeCount;
-                    u8CountMemberNumber++;
-                 }
+             {
+                u32OnTime=u32OnTime*10+(auCheckInput[0]-48);
+                u8CountInputOnTimeNumber++;
+             }
+           else if(u8CountInputOnTimeNumber>0&&auCheckInput[0]=='-')
+             {
+                u8InputOnTimeCount=!u8InputOnTimeCount;
+                u8CountMemberNumber++;
+             }
             /*input the of time*/
            if(u8InputOffTimeCount&&auCheckInput[0]!='-'&&auCheckInput[0]!='\r')
-               {  
-                    u32OffTime=u32OffTime*10+(auCheckInput[0]-48);
-                    u8CountInputOffTimeNumber++;
-                }
-               else if(u8CountInputOffTimeNumber>0&&auCheckInput[0]=='\r')
-               {
-                    u8InputOffTimeCount=!u8InputOffTimeCount;
-                    u8CountMemberNumber++;
-               }
+             {  
+                 u32OffTime=u32OffTime*10+(auCheckInput[0]-48);
+                 u8CountInputOffTimeNumber++;
+             }
+           else if(u8CountInputOffTimeNumber>0&&auCheckInput[0]=='\r')
+             {
+                 u8InputOffTimeCount=!u8InputOffTimeCount;
+                 u8CountMemberNumber++;
+             }
            
            if(auCheckInput[0]=='\r') 
             {
@@ -272,20 +279,24 @@ static void UserApp1SM_Idle(void)
             }
            
          
-         if(u8NumberOfUserList>0&&u8CountMemberNumber==0&&auCheckInput[0]=='\r')
+          if(u8NumberOfUserList>0&&u8CountMemberNumber==0&&auCheckInput[0]=='\r')
             {
+             
               for(u8 x = 0; x <u8NumberOfUserList; x++)
              {
                 LedDisplayAddCommand(USER_LIST, &aeUserList[x]);
              }
             }   
-           
-           
-      } 
-            
-            
-           
-        }
+       } 
+ 
+  
+  
+  
+  
+  
+  
+  
+  }
   
   
   
