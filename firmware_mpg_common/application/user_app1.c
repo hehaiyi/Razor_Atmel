@@ -1,28 +1,14 @@
 /**********************************************************************************************************************
 File: user_app1.c                                                                
-WangXinyi
-----------------------------------------------------------------------------------------------------------------------
-To start a new task using this user_app1 as a template:
- 1. Copy both user_app1.c and user_app1.h to the Application directory
- 2. Rename the files yournewtaskname.c and yournewtaskname.h
- 3. Add yournewtaskname.c and yournewtaskname.h to the Application Include and Source groups in the IAR project
- 4. Use ctrl-h (make sure "Match Case" is checked) to find and replace all instances of "user_app1" with "yournewtaskname"
- 5. Use ctrl-h to find and replace all instances of "UserApp1" with "YourNewTaskName"
- 6. Use ctrl-h to find and replace all instances of "USER_APP1" with "YOUR_NEW_TASK_NAME"
- 7. Add a call to YourNewTaskNameInitialize() in the init section of main
- 8. Add a call to YourNewTaskNameRunActiveState() in the Super Loop section of main
- 9. Update yournewtaskname.h per the instructions at the top of yournewtaskname.h
-10. Delete this text (between the dashed lines) and update the Description below to describe your task
-----------------------------------------------------------------------------------------------------------------------
 
 Description:
-This is a user_app1.c file template 
+Provides a Tera-Term driven system to display, read and write an LED command list.
 
 ------------------------------------------------------------------------------------------------------------------------
 API:
 
 Public functions:
-
+None.
 
 Protected System functions:
 void UserApp1Initialize(void)
@@ -38,7 +24,7 @@ Runs current task state.  Should only be called once in main loop.
 
 /***********************************************************************************************************************
 Global variable definitions with scope across entire project.
-All Global variable names shall start with "G_UserApp1"
+All Global variable names shall start with "G_"
 ***********************************************************************************************************************/
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                       /* Global state flags */
@@ -51,6 +37,9 @@ extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
 
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
 extern volatile u32 G_u32SystemTime1s;                 /* From board-specific source file */
+
+extern u8 G_au8DebugScanfBuffer[DEBUG_SCANF_BUFFER_SIZE]; /* From debug.c */
+extern u8 G_u8DebugScanfCharCount;                        /* From debug.c */
 
 
 /***********************************************************************************************************************
@@ -68,6 +57,7 @@ Function Definitions
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Public functions                                                                                                   */
 /*--------------------------------------------------------------------------------------------------------------------*/
+
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Protected functions                                                                                                */
@@ -87,8 +77,13 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
- 
-  /* If good initialization, set state to Idle */
+  u8 au8UserApp1Start1[] = "LED program task started\n\r";
+  /* Turn off the Debug task command processor and announce the task is ready */
+  DebugSetPassthrough();
+  DebugPrintf(au8UserApp1Start1);
+  
+  
+    /* If good initialization, set state to Idle */
   if( 1 )
   {
     UserApp1_StateMachine = UserApp1SM_Idle;
@@ -133,25 +128,273 @@ State Machine Function Definitions
 **********************************************************************************************************************/
 
 /*-------------------------------------------------------------------------------------------------------------------*/
-/* Wait for ??? */
+/* Wait for input */
+static u8 Output(u8 ListSize)
+{
+  static u8 au8UserProgram[]="Current USER Program:";
+  static u8 au8DisplayName[]="LED  ON TIME    OFF TIME";
+  static u8 au8SymbolDisplay[]="-----------------------";
+  static bool bEnterFlag=TRUE;
+  static u8 u8Count=0;
+  if(bEnterFlag == TRUE)
+  {
+     DebugPrintf(au8UserProgram);
+     DebugPrintf("\r\n");
+     DebugPrintf(au8DisplayName);
+     DebugPrintf("\r\n");
+     DebugPrintf(au8SymbolDisplay);
+     DebugPrintf("\r\n");
+     DebugPrintf(au8SymbolDisplay);
+     DebugPrintf("\r\n");
+
+     bEnterFlag=FALSE;
+  }
+  if(ListSize == 0)
+  {
+    DebugPrintf("list is null\r\n");
+    UserApp1_StateMachine = UserApp1SM_Idle;
+  }
+  else
+  {
+    if(LedDisplayPrintListLine(u8Count)!=FALSE)
+    {
+      u8Count++;
+    }
+    else
+    {
+      
+      DebugPrintf("\r\n");
+      DebugPrintf(au8SymbolDisplay);
+      DebugPrintf("\r\n");
+      u8Count=0;
+      UserApp1_StateMachine = UserApp1SM_Idle;
+      
+    }
+  }
+ 
+  
+  
+}
+
+
 static void UserApp1SM_Idle(void)
 {
-  bool IsButtonHeld(BUTTON3, 2000);
-  
-  
-  if(IsButtonHeld(BUTTON3, 2000))
-  {
-    LedBlink(GREEN, LED_1HZ)
-    LedBlink(RED, LED_1HZ)
+  static u8 auCheckProgramOrShow[1];                                           /*check input 1 or 2*/
+  static u8 auCheckInput[1];                                                   /*check any factor*/
+  static u8 u8CountMemberNumber=0;                                             /*check how many member had been input*/
+  static bool bCheckProgramOrShow=TRUE;                                        /*decide input or show */
+  static bool bBeginInputData=FALSE;                                           /*decide whether input */                                
+  static LedNumberType eLED1;                                                /*to store which Led*/     
+  static u32 u32OnTime=0;                                                      /*to store On time*/ 
+  static u32 u32OffTime=0;                                                     /*to store Off time*/
+  static u8 u8NumberOfUserList=0;                                                                                          
+  LedCommandType aeUserList[200];
+  static bool u8InputOnTimeCount=FALSE;
+  static bool u8InputOffTimeCount=FALSE;
+  static u8 u8CountInputOnTimeNumber=0; 
+  static u8 u8CountInputOffTimeNumber=0;
+
     
+  if(G_u8DebugScanfCharCount==1)
+  {
+   
+      if(!bBeginInputData)
+        {
+          DebugScanf(auCheckProgramOrShow);
+        }
+    
+      if(auCheckProgramOrShow[0]=='1'&&bBeginInputData==FALSE)
+        {   
+          DebugPrintf("\n\r");
+          bCheckProgramOrShow=FALSE;
+          bBeginInputData=TRUE;
+        }
+      
+      if(auCheckProgramOrShow[0]=='2'&&bBeginInputData==FALSE)
+        {   
+          Output(u8NumberOfUserList);
+          bCheckProgramOrShow=TRUE;
+          auCheckInput[0]=0;
+        }
+      
+      if(auCheckProgramOrShow[0]=='3'&&bBeginInputData==FALSE)
+        {   
+          DebugPrintf("\n\r");
+          bCheckProgramOrShow=FALSE;
+          bBeginInputData=TRUE;
+        }
+    
+    
+       if(u8CountMemberNumber==1&&!u8InputOnTimeCount)
+         {
+            u8InputOnTimeCount=TRUE;
+            u32OnTime=0;
+            u8CountInputOnTimeNumber=0;
+         }
+    
+      if(u8CountMemberNumber==2&&!u8InputOffTimeCount)
+        {
+           u8InputOffTimeCount=TRUE;
+           u32OffTime=0;
+           u8CountInputOffTimeNumber=0;
+        }
+        DebugScanf(auCheckInput);
+    
+ /*input the first menber*/
+     if(bCheckProgramOrShow==FALSE)
+       {   
+         if(u8CountMemberNumber==0&&auCheckInput[0]!='-')
+           { 
+             if(auCheckInput[0]=='W')
+             {
+                eLED1=WHITE;
+                u8CountMemberNumber++;
+             }
+              else if(auCheckInput[0]=='P')
+             {
+                eLED1=PURPLE;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='B')
+             {
+                eLED1=BLUE;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='C')
+             {
+                eLED1=CYAN;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='G')
+             {
+                eLED1=GREEN;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='Y')
+             {
+                eLED1=YELLOW;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='O')
+             {
+                eLED1=ORANGE;
+                u8CountMemberNumber++;
+             }
+             else if(auCheckInput[0]=='R')
+             {
+  
+                eLED1=RED;
+                u8CountMemberNumber++;
+             }
+            }
+             
+           /*input the on time*/
+           if(u8InputOnTimeCount&&auCheckInput[0]!='-')
+             {
+                u32OnTime=u32OnTime*10+(auCheckInput[0]-48);
+                u8CountInputOnTimeNumber++;
+             }
+           else if(u8CountInputOnTimeNumber>0&&auCheckInput[0]=='-')
+             {
+                u8InputOnTimeCount=!u8InputOnTimeCount;
+                u8CountMemberNumber++;
+                u8CountInputOnTimeNumber=0;
+             }
+            /*input the of time*/
+           if(u8InputOffTimeCount&&auCheckInput[0]!='-'&&auCheckInput[0]!='\r')
+             {  
+                 u32OffTime=u32OffTime*10+(auCheckInput[0]-48);
+                 u8CountInputOffTimeNumber++;
+             }
+           else if(u8CountInputOffTimeNumber>0&&auCheckInput[0]=='\r')
+             {
+                 u8InputOffTimeCount=!u8InputOffTimeCount;
+                 u8CountMemberNumber++;
+                 u8CountInputOffTimeNumber=0;
+                 
+             }
+           
+          
+          if(u8CountMemberNumber==3) 
+            {   
+                
+                aeUserList[u8NumberOfUserList].eLED=eLED1;
+                aeUserList[u8NumberOfUserList].u32Time=u32OnTime;
+                aeUserList[u8NumberOfUserList].bOn=TRUE;
+                aeUserList[u8NumberOfUserList].eCurrentRate=LED_PWM_0;
+                u8NumberOfUserList++;
+                aeUserList[u8NumberOfUserList].eLED=eLED1;
+                aeUserList[u8NumberOfUserList].u32Time=u32OffTime;
+                aeUserList[u8NumberOfUserList].bOn=FALSE;
+                aeUserList[u8NumberOfUserList].eCurrentRate=LED_PWM_100;
+                u8NumberOfUserList++;
+            }
+         
+        
+       
+          if(u8NumberOfUserList!=0&&u8CountMemberNumber==0&&auCheckInput[0]=='\r')
+            {
+              bBeginInputData=FALSE;
+              for(u8 x = 0; x <u8NumberOfUserList; x++)
+             {
+                LedDisplayAddCommand(USER_LIST, &aeUserList[x]);
+             }
+            }   
+           if(auCheckInput[0]=='\r') 
+            {
+               
+                DebugPrintf("\n\r");
+                u8CountMemberNumber=0;
+            }
+       
+       
+       
+       } 
+ 
+  
+  
+  
+  
+  
+  
+  
   }
   
-  if()
   
+  
+
+  
+  
+  
+ 
+  
+  
+  
+  
+  
+  
+/*
+ 
+  LedCommandType aeUserList[]=
+  {
+    {RED,0,TRUE,LED_PWM_0},
+    
+    {RED,500,FALSE,LED_PWM_100},
+  
+  
+  };
+   for(u8 i = 0; i < (sizeof(aeUserList) / sizeof(LedCommandType)); i++)
+  {
+    LedDisplayAddCommand(USER_LIST, &aeUserList[i]);
+  }
+ 
+ 
+  */
   
   
 } /* end UserApp1SM_Idle() */
-    
+                      
+            
 #if 0
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */

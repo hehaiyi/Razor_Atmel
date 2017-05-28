@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=-1331767526
+Checksum=-418853989
 [JLinkDriver]
 CStepIntDis=_ 0
 WatchCond=_ 0
@@ -43,8 +43,25 @@ UnspecRange=1
 ActionState=1
 [CodeCoverage]
 Enabled=_ 0
+[struct_types]
+Fmt0=LedCommandType-bOn	3	0
+Fmt1=LedCommandType-eCurrentRate	3	0
+[array_types]
+Fmt0=u8[1]	3	0
+Fmt1=u8[7]	4	0
 [watch_formats]
-Fmt0={W}3:UserApp_u8AdcResultCount	3	0
+Fmt0={W}1:x	3	0
+Fmt1={W}2:Msg_u8QueuedMessageCount	3	0
+Fmt2={W}3:G_u8DebugScanfCharCount	3	0
+Fmt3={W}3:aArray[0]	3	0
+Fmt4={W}3:aeUserList[i].bOn	3	0
+Fmt5={W}3:aeUserList[i].eLED	3	0
+Fmt6={W}3:auCheckInput[0]	3	0
+Fmt7={W}3:auCheckProgramOrShow[0]	3	0
+Fmt8={W}3:counter	3	0
+Fmt9={W}3:eLED1	3	0
+Fmt10={W}3:i	3	0
+Fmt11={W}3:u8CountMemberNumber	3	0
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -63,10 +80,7 @@ Exclusions=
 [Disassemble mode]
 mode=0
 [Breakpoints2]
-Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\firmware_mpg_common\drivers\adc12.c}.317.3" 0 0 1 "" 0 "" 0
-Bp1=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\application\main.c}.78.3" 0 0 1 "" 0 "" 0
-Bp2=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\firmware_mpg_common\application\user_app1.h}.57.1" 0 0 1 "" 0 "" 0
-Count=3
+Count=0
 [Aliases]
 Count=0
 SuppressDialog=0
