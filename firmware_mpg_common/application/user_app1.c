@@ -129,6 +129,54 @@ State Machine Function Definitions
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for input */
+static u8 Output(u8 ListSize)
+{
+  static u8 au8UserProgram[]="Current USER Program:";
+  static u8 au8DisplayName[]="LED  ON TIME    OFF TIME";
+  static u8 au8SymbolDisplay[]="-----------------------";
+  static bool bEnterFlag=TRUE;
+  static u8 u8Count=0;
+  if(bEnterFlag == TRUE)
+  {
+     DebugPrintf(au8UserProgram);
+     DebugPrintf("\r\n");
+     DebugPrintf(au8DisplayName);
+     DebugPrintf("\r\n");
+     DebugPrintf(au8SymbolDisplay);
+     DebugPrintf("\r\n");
+     DebugPrintf(au8SymbolDisplay);
+     DebugPrintf("\r\n");
+
+     bEnterFlag=FALSE;
+  }
+  if(ListSize == 0)
+  {
+    DebugPrintf("list is null\r\n");
+    UserApp1_StateMachine = UserApp1SM_Idle;
+  }
+  else
+  {
+    if(LedDisplayPrintListLine(u8Count)!=FALSE)
+    {
+      u8Count++;
+    }
+    else
+    {
+      
+      DebugPrintf("\r\n");
+      DebugPrintf(au8SymbolDisplay);
+      DebugPrintf("\r\n");
+      u8Count=0;
+      UserApp1_StateMachine = UserApp1SM_Idle;
+      
+    }
+  }
+ 
+  
+  
+}
+
+
 static void UserApp1SM_Idle(void)
 {
   static u8 auCheckProgramOrShow[1];                                           /*check input 1 or 2*/
@@ -158,17 +206,23 @@ static void UserApp1SM_Idle(void)
       if(auCheckProgramOrShow[0]=='1'&&bBeginInputData==FALSE)
         {   
           DebugPrintf("\n\r");
-          bCheckProgramOrShow=!bCheckProgramOrShow;
-          bBeginInputData=!bBeginInputData;
+          bCheckProgramOrShow=FALSE;
+          bBeginInputData=TRUE;
         }
       
-      if(auCheckProgramOrShow[0]=='3'&&bBeginInputData==TRUE)
+      if(auCheckProgramOrShow[0]=='2'&&bBeginInputData==FALSE)
+        {   
+          Output(u8NumberOfUserList);
+          bCheckProgramOrShow=TRUE;
+          auCheckInput[0]=0;
+        }
+      
+      if(auCheckProgramOrShow[0]=='3'&&bBeginInputData==FALSE)
         {   
           DebugPrintf("\n\r");
-          bCheckProgramOrShow=!bCheckProgramOrShow;
-          bBeginInputData=!bBeginInputData;
+          bCheckProgramOrShow=FALSE;
+          bBeginInputData=TRUE;
         }
-    
     
     
        if(u8CountMemberNumber==1&&!u8InputOnTimeCount)
@@ -178,7 +232,7 @@ static void UserApp1SM_Idle(void)
             u8CountInputOnTimeNumber=0;
          }
     
-     if(u8CountMemberNumber==2&&!u8InputOffTimeCount)
+      if(u8CountMemberNumber==2&&!u8InputOffTimeCount)
         {
            u8InputOffTimeCount=TRUE;
            u32OffTime=0;
@@ -244,6 +298,7 @@ static void UserApp1SM_Idle(void)
              {
                 u8InputOnTimeCount=!u8InputOnTimeCount;
                 u8CountMemberNumber++;
+                u8CountInputOnTimeNumber=0;
              }
             /*input the of time*/
            if(u8InputOffTimeCount&&auCheckInput[0]!='-'&&auCheckInput[0]!='\r')
@@ -255,16 +310,14 @@ static void UserApp1SM_Idle(void)
              {
                  u8InputOffTimeCount=!u8InputOffTimeCount;
                  u8CountMemberNumber++;
+                 u8CountInputOffTimeNumber=0;
+                 
              }
            
-           if(auCheckInput[0]=='\r') 
-            {
-               
-                DebugPrintf("\n\r");
-            }
+          
           if(u8CountMemberNumber==3) 
             {   
-             
+                
                 aeUserList[u8NumberOfUserList].eLED=eLED1;
                 aeUserList[u8NumberOfUserList].u32Time=u32OnTime;
                 aeUserList[u8NumberOfUserList].bOn=TRUE;
@@ -274,19 +327,28 @@ static void UserApp1SM_Idle(void)
                 aeUserList[u8NumberOfUserList].u32Time=u32OffTime;
                 aeUserList[u8NumberOfUserList].bOn=FALSE;
                 aeUserList[u8NumberOfUserList].eCurrentRate=LED_PWM_100;
-                u8CountMemberNumber=0;
                 u8NumberOfUserList++;
             }
-           
          
-          if(u8NumberOfUserList>0&&u8CountMemberNumber==0&&auCheckInput[0]=='\r')
+        
+       
+          if(u8NumberOfUserList!=0&&u8CountMemberNumber==0&&auCheckInput[0]=='\r')
             {
-             
+              bBeginInputData=FALSE;
               for(u8 x = 0; x <u8NumberOfUserList; x++)
              {
                 LedDisplayAddCommand(USER_LIST, &aeUserList[x]);
              }
             }   
+           if(auCheckInput[0]=='\r') 
+            {
+               
+                DebugPrintf("\n\r");
+                u8CountMemberNumber=0;
+            }
+       
+       
+       
        } 
  
   
