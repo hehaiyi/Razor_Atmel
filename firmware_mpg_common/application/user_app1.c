@@ -172,8 +172,11 @@ static u8 Output(u8 ListSize)
     }
   }
  
+
   return 0;
+
   
+
 }
 
 
@@ -318,6 +321,7 @@ static void UserApp1SM_Idle(void)
              
            /*input the on time*/
            if(u8InputOnTimeCount&&auCheckInput[0]!='-')
+
            {
               u32OnTime=u32OnTime*10+(auCheckInput[0]-48);
               u8CountInputOnTimeNumber++;
@@ -357,6 +361,8 @@ static void UserApp1SM_Idle(void)
               aeUserList[u8NumberOfUserList].eCurrentRate=LED_PWM_100;
               u8NumberOfUserList++;
           }
+
+
          
         
        
@@ -370,6 +376,7 @@ static void UserApp1SM_Idle(void)
             }   
            if(auCheckInput[0]=='\r') 
             {
+
                 DebugPrintf("\n\r");               
                 if(!bIfInputLed&&u8CountMemberNumber==3)
                 {
@@ -384,7 +391,9 @@ static void UserApp1SM_Idle(void)
                 u8CountMemberNumber=0;
                 bIfInputLed=FALSE;
                 bIfInputMuchMark=FALSE;
-                u8MarkCount=0;
+                u8MarkCount=0;            
+                DebugPrintf("\n\r");
+                u8CountMemberNumber=0;
             }
        
        
