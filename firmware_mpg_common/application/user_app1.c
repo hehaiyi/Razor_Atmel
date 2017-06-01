@@ -77,11 +77,12 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  u8 au8UserMenuAndListDisplay[]="LED Programming Interface\n\rPress 1 to program LED command sequence\n\rPress 2 to show current USER program";
   u8 au8UserApp1Start1[] = "LED program task started\n\r";
   /* Turn off the Debug task command processor and announce the task is ready */
   DebugSetPassthrough();
   DebugPrintf(au8UserApp1Start1);
-  
+  DebugPrintf(au8UserMenuAndListDisplay);
   
     /* If good initialization, set state to Idle */
   if( 1 )
@@ -129,13 +130,18 @@ State Machine Function Definitions
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for input */
+
+/*function is the user input the correct code shown one by one
+  ListSize is listnode count*/
 static u8 Output(u8 ListSize)
-{
+{ /*output interface*/
+  static u8 auUserTips[]="If you want to add new command,input 3\n\r";
   static u8 au8UserProgram[]="Current USER Program:";
   static u8 au8DisplayName[]="LED  ON TIME    OFF TIME";
   static u8 au8SymbolDisplay[]="-----------------------";
   static bool bEnterFlag=TRUE;
   static u8 u8Count=0;
+  /*allow appear output interface*/
   if(bEnterFlag == TRUE)
   {
      DebugPrintf(au8UserProgram);
@@ -149,13 +155,14 @@ static u8 Output(u8 ListSize)
 
      bEnterFlag=FALSE;
   }
+  /*list is null ,go back UserApp1SM_Idle*/
   if(ListSize == 0)
   {
     DebugPrintf("list is null\r\n");
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   else
-  {
+  { /*whether the list  over?*/
     if(LedDisplayPrintListLine(u8Count)!=FALSE)
     {
       u8Count++;
@@ -166,22 +173,19 @@ static u8 Output(u8 ListSize)
       DebugPrintf("\r\n");
       DebugPrintf(au8SymbolDisplay);
       DebugPrintf("\r\n");
+      DebugPrintf(auUserTips);
       u8Count=0;
       UserApp1_StateMachine = UserApp1SM_Idle;
       
     }
   }
- 
-
-  return 0;
-
-  
-
+ return 0;
 }
 
 
 static void UserApp1SM_Idle(void)
 {
+  static u8 auUserMenuandListDisplay[]="Enter command as LED-ONTIME-OFFTIME and press Enter\n\rTIME is in milliseconds,max 100 commands\n\rExample: R-100-200(Red on at 100ms and off at 200ms)\n\rPress Enter on blank line to end\n\r";
   static u8 auCheckProgramOrShow[1];                                           /*check input 1 or 2*/
   static u8 auCheckInput[1];                                                   /*check any factor*/
   static u8 u8CountMemberNumber=0;                                             /*check how many member had been input*/
@@ -218,6 +222,7 @@ static void UserApp1SM_Idle(void)
         DebugPrintf("\n\r");
         bCheckProgramOrShow=FALSE;
         bBeginInputData=TRUE;
+        DebugPrintf(auUserMenuandListDisplay);
       }
       
       if(auCheckProgramOrShow[0]=='2'&&bBeginInputData==FALSE)

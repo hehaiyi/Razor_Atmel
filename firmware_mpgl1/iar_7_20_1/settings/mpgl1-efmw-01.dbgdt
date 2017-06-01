@@ -71,7 +71,7 @@
       <WATCH_1>
         <expressions>
           <item>u8SpaceCount</item>
-          <item></item>
+          <item/>
         </expressions>
         <col-names>
           <item>Expression</item>
