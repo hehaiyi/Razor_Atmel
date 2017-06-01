@@ -190,7 +190,7 @@ static void UserApp1SM_Idle(void)
   static LedNumberType eLED1;                                                  /*to store which Led*/     
   static u32 u32OnTime=0;                                                      /*to store On time*/ 
   static u32 u32OffTime=0;                                                     /*to store Off time*/
-  static u8 u8NumberOfUserL=0;                                                 /*to show how many instructions be store*/                                           
+  static u8 u8NumberOfUserList=0;                                              /*to show how many instructions be store*/                                           
   LedCommandType aeUserList[200];
   static bool u8InputOnTimeCount=FALSE;
   static bool u8InputOffTimeCount=FALSE;
@@ -341,7 +341,7 @@ static void UserApp1SM_Idle(void)
            }
            else if(u8CountInputOnTimeNumber>0&&auCheckInput[0]=='-')
            {
-              u8InputOnTimeCount=!u8InputOnTimeCount;
+              u8InputOnTimeCount=FALSE;
               u8CountMemberNumber++;
               u8CountInputOnTimeNumber=0;
            }
@@ -355,7 +355,7 @@ static void UserApp1SM_Idle(void)
            }
            else if(u8CountInputOffTimeNumber>0&&auCheckInput[0]=='\r')
            {
-               u8InputOffTimeCount=!u8InputOffTimeCount;
+               u8InputOffTimeCount=FALSE;
                u8CountMemberNumber++;
                u8CountInputOffTimeNumber=0;
                
@@ -378,7 +378,7 @@ static void UserApp1SM_Idle(void)
           }
 
 
-          /*Store the data into list*/
+          /*Store the data into list and initial some varities*/
           if(u8NumberOfUserList!=0&&u8CountMemberNumber==0&&auCheckInput[0]=='\r')
           {
             bBeginInputData=FALSE;
