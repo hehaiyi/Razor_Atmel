@@ -187,10 +187,10 @@ static void UserApp1SM_Idle(void)
   static u8 u8CountMemberNumber=0;                                             /*check how many member had been input*/
   static bool bCheckProgramOrShow=TRUE;                                        /*decide input or show */
   static bool bBeginInputData=FALSE;                                           /*decide whether input */                                
-  static LedNumberType eLED1;                                                /*to store which Led*/     
+  static LedNumberType eLED1;                                                  /*to store which Led*/     
   static u32 u32OnTime=0;                                                      /*to store On time*/ 
   static u32 u32OffTime=0;                                                     /*to store Off time*/
-  static u8 u8NumberOfUserList=0;                                                                                          
+  static u8 u8NumberOfUserL=0;                                                 /*to show how many instructions be store*/                                           
   LedCommandType aeUserList[200];
   static bool u8InputOnTimeCount=FALSE;
   static bool u8InputOffTimeCount=FALSE;
@@ -198,130 +198,143 @@ static void UserApp1SM_Idle(void)
   static u8 u8CountInputOffTimeNumber=0;
   static u8 u8LedError[]="Don't show which Led";
   static u8 u8InputMuchMark[]="Too much '-'";
+  static u8 u8InputExtraSpace[]="Extea space ' '";
   static u8 u8MarkCount=0;
+  static u8 u8SpaceCount=0;
   static bool bIfInputMuchMark=FALSE;
   static bool bIfInputLed=FALSE;
+  static bool bIfInputExtraSpace=FALSE;
     
   if(G_u8DebugScanfCharCount==1)
   {
    
       if(!bBeginInputData)
-        {
-          DebugScanf(auCheckProgramOrShow);
-        }
+      {
+        DebugScanf(auCheckProgramOrShow);
+      }
     
       if(auCheckProgramOrShow[0]=='1'&&bBeginInputData==FALSE)
-        {   
-          DebugPrintf("\n\r");
-          bCheckProgramOrShow=FALSE;
-          bBeginInputData=TRUE;
-        }
+      {   
+        DebugPrintf("\n\r");
+        bCheckProgramOrShow=FALSE;
+        bBeginInputData=TRUE;
+      }
       
       if(auCheckProgramOrShow[0]=='2'&&bBeginInputData==FALSE)
-        {   
-          Output(u8NumberOfUserList);
-          bCheckProgramOrShow=TRUE;
-          auCheckInput[0]=0;
-        }
+      {   
+        Output(u8NumberOfUserList);
+        bCheckProgramOrShow=TRUE;
+        auCheckInput[0]=0;
+      }
       
       if(auCheckProgramOrShow[0]=='3'&&bBeginInputData==FALSE)
-        {   
-          DebugPrintf("\n\r");
-          bCheckProgramOrShow=FALSE;
-          bBeginInputData=TRUE;
-        }
+      {   
+        DebugPrintf("\n\r");
+        bCheckProgramOrShow=FALSE;
+        bBeginInputData=TRUE;
+      }
     
     
        if(u8CountMemberNumber==1&&!u8InputOnTimeCount)
-         {
-            u8InputOnTimeCount=TRUE;
-            u32OnTime=0;
-            u8CountInputOnTimeNumber=0;
-         }
+       {
+          u8InputOnTimeCount=TRUE;
+          u32OnTime=0;
+          u8CountInputOnTimeNumber=0;
+       }
     
       if(u8CountMemberNumber==2&&!u8InputOffTimeCount)
-        {
-           u8InputOffTimeCount=TRUE;
-           u32OffTime=0;
-           u8CountInputOffTimeNumber=0;
-        }
+      {
+         u8InputOffTimeCount=TRUE;
+         u32OffTime=0;
+         u8CountInputOffTimeNumber=0;
+      }
         
        DebugScanf(auCheckInput);
- /*input the first menber*/
+     /*input the first menber*/
      if(bCheckProgramOrShow==FALSE)
-       {   
+     {   
+       
+       if(u8CountMemberNumber==0&&auCheckInput[0]!='-')
+       { 
+         if(auCheckInput[0]=='W'||auCheckInput[0]=='w')
+         {
+            eLED1=WHITE;
+            u8CountMemberNumber++;
+            bIfInputLed=TRUE;
+         }
+         else if(auCheckInput[0]=='P'||auCheckInput[0]=='p')
+         {
+            eLED1=PURPLE;
+            u8CountMemberNumber++;
+            bIfInputLed=TRUE;
+         }
+         else if(auCheckInput[0]=='B'||auCheckInput[0]=='b')
+         {
+            eLED1=BLUE;
+            u8CountMemberNumber++;
+            bIfInputLed=TRUE;
+         }
+         else if(auCheckInput[0]=='C'||auCheckInput[0]=='c')
+         {
+            eLED1=CYAN;
+            u8CountMemberNumber++;
+            bIfInputLed=TRUE;
+         }
+         else if(auCheckInput[0]=='G'||auCheckInput[0]=='g')
+         {
+            eLED1=GREEN;
+            u8CountMemberNumber++;
+            bIfInputLed=TRUE;
+         }
+         else if(auCheckInput[0]=='Y'||auCheckInput[0]=='y')
+         {
+            eLED1=YELLOW;
+            u8CountMemberNumber++;
+            bIfInputLed=TRUE;
+         }
+         else if(auCheckInput[0]=='O'||auCheckInput[0]=='o')
+         {
+            eLED1=ORANGE;
+            u8CountMemberNumber++;
+            bIfInputLed=TRUE;
+         }
+         else if(auCheckInput[0]=='R'||auCheckInput[0]=='r')
+         {
+            eLED1=RED;
+            u8CountMemberNumber++;
+            bIfInputLed=TRUE;
+         }
+         else if(auCheckInput[0]!=NULL&&auCheckInput[0]!='\r')
+         {
+            u8CountMemberNumber++;
+         }
+       }
+           
          
-         if(u8CountMemberNumber==0&&auCheckInput[0]!='-')
-           { 
-             if(auCheckInput[0]=='W'||auCheckInput[0]=='w')
-             {
-                eLED1=WHITE;
-                u8CountMemberNumber++;
-                bIfInputLed=TRUE;
-             }
-              else if(auCheckInput[0]=='P'||auCheckInput[0]=='p')
-             {
-                eLED1=PURPLE;
-                u8CountMemberNumber++;
-                bIfInputLed=TRUE;
-             }
-             else if(auCheckInput[0]=='B'||auCheckInput[0]=='b')
-             {
-                eLED1=BLUE;
-                u8CountMemberNumber++;
-                bIfInputLed=TRUE;
-             }
-             else if(auCheckInput[0]=='C'||auCheckInput[0]=='c')
-             {
-                eLED1=CYAN;
-                u8CountMemberNumber++;
-                bIfInputLed=TRUE;
-             }
-             else if(auCheckInput[0]=='G'||auCheckInput[0]=='g')
-             {
-                eLED1=GREEN;
-                u8CountMemberNumber++;
-                bIfInputLed=TRUE;
-             }
-             else if(auCheckInput[0]=='Y'||auCheckInput[0]=='y')
-             {
-                eLED1=YELLOW;
-                u8CountMemberNumber++;
-                bIfInputLed=TRUE;
-             }
-             else if(auCheckInput[0]=='O'||auCheckInput[0]=='o')
-             {
-                eLED1=ORANGE;
-                u8CountMemberNumber++;
-                bIfInputLed=TRUE;
-             }
-             else if(auCheckInput[0]=='R'||auCheckInput[0]=='r')
-             {
-  
-                eLED1=RED;
-                u8CountMemberNumber++;
-                bIfInputLed=TRUE;
-             }
-             else if(auCheckInput[0]!=NULL&&auCheckInput[0]!='\r')
-             {
-                u8CountMemberNumber++;
-             }
-    
-           }
-              
+           /*Check '-'*/    
            if(auCheckInput[0]=='-')
            {
               u8MarkCount++;
               if(u8MarkCount>2)
-                {
-                    bIfInputMuchMark=TRUE;
-                }
+              {
+                  bIfInputMuchMark=TRUE;
+              }
+           }
+        
+           
+           /*Check Space*/
+           if(auCheckInput[0]==32)
+           {
+              u8SpaceCount++;
+              if(u8SpaceCount!=0)
+              {
+                 bIfInputExtraSpace=TRUE; 
+              }
            }
          
              
            /*input the on time*/
            if(u8InputOnTimeCount&&auCheckInput[0]!='-')
-
            {
               u32OnTime=u32OnTime*10+(auCheckInput[0]-48);
               u8CountInputOnTimeNumber++;
@@ -332,7 +345,9 @@ static void UserApp1SM_Idle(void)
               u8CountMemberNumber++;
               u8CountInputOnTimeNumber=0;
            }
-            /*input the of time*/
+           
+         
+           /*input the of time*/
            if(u8InputOffTimeCount&&auCheckInput[0]!='-'&&auCheckInput[0]!='\r')
            {  
                u32OffTime=u32OffTime*10+(auCheckInput[0]-48);
@@ -347,9 +362,9 @@ static void UserApp1SM_Idle(void)
            }
            
           
-          if(u8CountMemberNumber==3&&bIfInputLed&&!bIfInputMuchMark) 
+          /*Store the data into arrat*/
+          if(u8CountMemberNumber==3&&bIfInputLed&&!bIfInputMuchMark&&!bIfInputExtraSpace) 
           {   
-              
               aeUserList[u8NumberOfUserList].eLED=eLED1;
               aeUserList[u8NumberOfUserList].u32Time=u32OnTime;
               aeUserList[u8NumberOfUserList].bOn=TRUE;
@@ -363,51 +378,45 @@ static void UserApp1SM_Idle(void)
           }
 
 
-         
-        
-       
+          /*Store the data into list*/
           if(u8NumberOfUserList!=0&&u8CountMemberNumber==0&&auCheckInput[0]=='\r')
-            {
-              bBeginInputData=FALSE;
-              for(u8 x = 0; x <u8NumberOfUserList; x++)
-             {
-                LedDisplayAddCommand(USER_LIST, &aeUserList[x]);
-             }
-            }   
-           if(auCheckInput[0]=='\r') 
-            {
+          {
+            bBeginInputData=FALSE;
+            for(u8 x = 0; x <u8NumberOfUserList; x++)
+           {
+              LedDisplayAddCommand(USER_LIST, &aeUserList[x]);
+           }
+          }   
+           if(auCheckInput[0]=='\r')
+           {
 
-                DebugPrintf("\n\r");               
-                if(!bIfInputLed&&u8CountMemberNumber==3)
-                {
-                    DebugPrintf(u8LedError);
-                    DebugPrintf("\n\r");
-                }
-                if(bIfInputMuchMark&&u8CountMemberNumber==3)
-                {
-                    DebugPrintf(u8InputMuchMark);
-                    DebugPrintf("\n\r");
-                }
-                u8CountMemberNumber=0;
-                bIfInputLed=FALSE;
-                bIfInputMuchMark=FALSE;
-                u8MarkCount=0;            
-                DebugPrintf("\n\r");
-                u8CountMemberNumber=0;
-            }
-       
-       
-       
+              DebugPrintf("\n\r");               
+              if(!bIfInputLed&&u8CountMemberNumber==3)
+              {
+                  DebugPrintf(u8LedError);
+                  DebugPrintf("\n\r");
+              }
+            
+              if(bIfInputMuchMark&&u8CountMemberNumber==3)
+              {
+                  DebugPrintf(u8InputMuchMark);
+                  DebugPrintf("\n\r");
+              }
+              
+              if(bIfInputExtraSpace&&u8CountMemberNumber==3)
+              {
+                  DebugPrintf(u8InputExtraSpace);
+                  DebugPrintf("\n\r");
+              }
+              u8CountMemberNumber=0;
+              bIfInputLed=FALSE;
+              bIfInputMuchMark=FALSE;
+              bIfInputExtraSpace=FALSE;
+              u8MarkCount=0;            
+              u8SpaceCount=0;
+           }
        } 
- 
-  
-  
-  
-  
-  
-  
-  
-  }
+ }
   
   
   
