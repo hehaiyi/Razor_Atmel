@@ -135,10 +135,10 @@ State Machine Function Definitions
   ListSize is listnode count*/
 static u8 Output(u8 ListSize)
 { /*output interface*/
-<<<<<<< HEAD
-=======
+
+
   static u8 auUserTips[]="If you want to add new command,input 3\n\r";
->>>>>>> origin/eiefw1_project_groupnumber
+
   static u8 au8UserProgram[]="Current USER Program:";
   static u8 au8DisplayName[]="LED  ON TIME    OFF TIME";
   static u8 au8SymbolDisplay[]="-----------------------";
@@ -172,15 +172,15 @@ static u8 Output(u8 ListSize)
     {
       
       DebugPrintf("\r\n");
-<<<<<<< HEAD
+
       // DebugPrintf(au8SymbolDisplay);
       //u8Count=0;
-=======
+
       DebugPrintf(au8SymbolDisplay);
       DebugPrintf("\r\n");
       DebugPrintf(auUserTips);
       u8Count=0;
->>>>>>> origin/eiefw1_project_groupnumber
+
       UserApp1_StateMachine = UserApp1SM_Idle;
        
     }
@@ -193,10 +193,7 @@ static u8 Output(u8 ListSize)
 static void UserApp1SM_Idle(void)
 {
   static u8 auUserMenuandListDisplay[]="Enter command as LED-ONTIME-OFFTIME and press Enter\n\rTIME is in milliseconds,max 100 commands\n\rExample: R-100-200(Red on at 100ms and off at 200ms)\n\rPress Enter on blank line to end\n\r";
-<<<<<<< HEAD
   static u8 auUserTips[]="If you want to add new command,input 3\n\r";
-=======
->>>>>>> origin/eiefw1_project_groupnumber
   static u8 auCheckProgramOrShow[1];                                           /*check input 1 or 2*/
   static u8 auCheckInput[1];                                                   /*check any factor*/
   static u8 u8CountMemberNumber=0;                                             /*check how many member had been input*/
@@ -213,20 +210,15 @@ static void UserApp1SM_Idle(void)
   static u8 u8CountInputOffTimeNumber=0;
   static u8 u8LedError[]="Don't show which Led";
   static u8 u8InputMuchMark[]="Too much '-'";
-<<<<<<< HEAD
   static u8 u8InputExtraSpace[]="Extra space ' '";
-=======
-  static u8 u8InputExtraSpace[]="Extea space ' '";
->>>>>>> origin/eiefw1_project_groupnumber
   static u8 u8MarkCount=0;
   static u8 u8SpaceCount=0;
   static bool bIfInputMuchMark=FALSE;
   static bool bIfInputLed=FALSE;
   static bool bIfInputExtraSpace=FALSE;
-<<<<<<< HEAD
   static u8 u8Countu8NumberOfUserList=0;
-=======
->>>>>>> origin/eiefw1_project_groupnumber
+
+
     
   if(G_u8DebugScanfCharCount==1)
   {
@@ -236,11 +228,8 @@ static void UserApp1SM_Idle(void)
         DebugScanf(auCheckProgramOrShow);
       }
     
-<<<<<<< HEAD
+
       if(auCheckProgramOrShow[0]=='1'&&bBeginInputData==FALSE)                  /*Enter mode 1 to input*/
-=======
-      if(auCheckProgramOrShow[0]=='1'&&bBeginInputData==FALSE)
->>>>>>> origin/eiefw1_project_groupnumber
       {   
         DebugPrintf("\n\r");
         bCheckProgramOrShow=FALSE;
@@ -248,7 +237,7 @@ static void UserApp1SM_Idle(void)
         DebugPrintf(auUserMenuandListDisplay);
       }
       
-<<<<<<< HEAD
+
       if(auCheckProgramOrShow[0]=='2'&&bBeginInputData==FALSE)                  /*Enter mode 2 to show list*/
       { 
         DebugPrintf("\n\r");
@@ -257,28 +246,20 @@ static void UserApp1SM_Idle(void)
           Output(u8NumberOfUserList);
         }
         DebugPrintf(auUserTips);
-=======
-      if(auCheckProgramOrShow[0]=='2'&&bBeginInputData==FALSE)
-      {   
-        Output(u8NumberOfUserList);
->>>>>>> origin/eiefw1_project_groupnumber
         bCheckProgramOrShow=TRUE;
         auCheckInput[0]=0;
       }
       
-<<<<<<< HEAD
+
       if(auCheckProgramOrShow[0]=='3'&&bBeginInputData==FALSE)                  /*Input again*/
-=======
-      if(auCheckProgramOrShow[0]=='3'&&bBeginInputData==FALSE)
->>>>>>> origin/eiefw1_project_groupnumber
+
       {   
         DebugPrintf("\n\r");
         bCheckProgramOrShow=FALSE;
         bBeginInputData=TRUE;
-<<<<<<< HEAD
+
         DebugPrintf(auUserMenuandListDisplay);
-=======
->>>>>>> origin/eiefw1_project_groupnumber
+
       }
     
     
