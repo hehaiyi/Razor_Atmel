@@ -10,7 +10,11 @@ LimitSize=0
 ByteLimit=50
 [DebugChecksum]
 <<<<<<< HEAD
+<<<<<<< HEAD
 Checksum=196318499
+=======
+Checksum=-146728161
+>>>>>>> origin/eiefw1_project_groupnumber
 =======
 Checksum=-418853989
 >>>>>>> origin/eiefw1_project_groupnumber
@@ -67,6 +71,16 @@ Fmt9={W}3:counter	3	0
 Fmt10={W}3:eLED1	3	0
 Fmt11={W}3:i	3	0
 Fmt12={W}3:u8CountMemberNumber	3	0
+<<<<<<< HEAD
+=======
+[Trace1]
+Enabled=0
+ShowSource=1
+[Disassemble mode]
+mode=0
+[Breakpoints2]
+Count=0
+>>>>>>> origin/eiefw1_project_groupnumber
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
