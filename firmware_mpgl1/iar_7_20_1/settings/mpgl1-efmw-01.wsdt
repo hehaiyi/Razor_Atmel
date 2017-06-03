@@ -22,6 +22,7 @@
         <ColumnWidth2>261</ColumnWidth2>
         <ColumnWidth3>65</ColumnWidth3>
       </Build>
+      <TerminalIO/>
     </Static>
     <Windows>
       <Wnd0>
@@ -61,11 +62,23 @@
           <SelStart>0</SelStart>
           <SelEnd>0</SelEnd>
           <XPos2>0</XPos2>
-          <YPos2>202</YPos2>
-          <SelStart2>9165</SelStart2>
-          <SelEnd2>9165</SelEnd2>
+          <YPos2>128</YPos2>
+          <SelStart2>6223</SelStart2>
+          <SelEnd2>6223</SelEnd2>
         </Tab>
         <ActiveTab>0</ActiveTab>
+        <Tab>
+          <Factory>TextEditor</Factory>
+          <Filename>$WS_DIR$\..\application\main.c</Filename>
+          <XPos>0</XPos>
+          <YPos>0</YPos>
+          <SelStart>0</SelStart>
+          <SelEnd>0</SelEnd>
+          <XPos2>0</XPos2>
+          <YPos2>32</YPos2>
+          <SelStart2>2647</SelStart2>
+          <SelEnd2>2647</SelEnd2>
+        </Tab>
       </Pane>
       <ActivePane>0</ActivePane>
       <Sizes>
@@ -85,6 +98,9 @@
             </Toolbar-04A47D10>
           </Sizes>
         </Row0>
+        <Row1>
+          <Sizes/>
+        </Row1>
       </Top>
       <Left>
         <Row0>

@@ -136,9 +136,6 @@ State Machine Function Definitions
 static u8 Output(u8 ListSize)
 { /*output interface*/
 
-
-  static u8 auUserTips[]="If you want to add new command,input 3\n\r";
-
   static u8 au8UserProgram[]="Current USER Program:";
   static u8 au8DisplayName[]="LED  ON TIME    OFF TIME";
   static u8 au8SymbolDisplay[]="-----------------------";
@@ -172,15 +169,10 @@ static u8 Output(u8 ListSize)
     {
       
       DebugPrintf("\r\n");
-
       // DebugPrintf(au8SymbolDisplay);
       //u8Count=0;
-
       DebugPrintf(au8SymbolDisplay);
       DebugPrintf("\r\n");
-      DebugPrintf(auUserTips);
-      u8Count=0;
-
       UserApp1_StateMachine = UserApp1SM_Idle;
        
     }
@@ -252,14 +244,11 @@ static void UserApp1SM_Idle(void)
       
 
       if(auCheckProgramOrShow[0]=='3'&&bBeginInputData==FALSE)                  /*Input again*/
-
       {   
         DebugPrintf("\n\r");
         bCheckProgramOrShow=FALSE;
         bBeginInputData=TRUE;
-
         DebugPrintf(auUserMenuandListDisplay);
-
       }
     
     
