@@ -171,8 +171,6 @@ static u8 Output(u8 ListSize)
       DebugPrintf("\r\n");
       // DebugPrintf(au8SymbolDisplay);
       //u8Count=0;
-      DebugPrintf(au8SymbolDisplay);
-      DebugPrintf("\r\n");
       UserApp1_StateMachine = UserApp1SM_Idle;
        
     }
