@@ -77,12 +77,12 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  u8 au8UserMenuAndListDisplay[]="LED Programming Interface\n\rPress 1 to program LED command sequence\n\rPress 2 to show current USER program";
+  
   u8 au8UserApp1Start1[] = "LED program task started\n\r";
   /* Turn off the Debug task command processor and announce the task is ready */
   DebugSetPassthrough();
   DebugPrintf(au8UserApp1Start1);
-  DebugPrintf(au8UserMenuAndListDisplay);
+
   
     /* If good initialization, set state to Idle */
   if( 1 )
@@ -135,13 +135,9 @@ State Machine Function Definitions
   ListSize is listnode count*/
 static u8 Output(u8 ListSize)
 { /*output interface*/
-
-  static u8 au8UserProgram[]="Current USER Program:";
-  static u8 au8DisplayName[]="LED  ON TIME    OFF TIME";
-  static u8 au8SymbolDisplay[]="-----------------------";
-  static bool bEnterFlag=TRUE;
   static u8 u8Count=0;
   /*allow appear output interface*/
+  /*
   if(bEnterFlag == TRUE)
   {
      DebugPrintf(au8UserProgram);
@@ -153,6 +149,8 @@ static u8 Output(u8 ListSize)
 
      bEnterFlag=FALSE;
   }
+  */
+  
   /*list is null ,go back UserApp1SM_Idle*/
   if(ListSize == 0)
   {
@@ -167,12 +165,7 @@ static u8 Output(u8 ListSize)
     }
     else
     {
-      
-      DebugPrintf("\r\n");
-      // DebugPrintf(au8SymbolDisplay);
-      //u8Count=0;
       UserApp1_StateMachine = UserApp1SM_Idle;
-       
     }
 
   }
@@ -182,8 +175,12 @@ static u8 Output(u8 ListSize)
 
 static void UserApp1SM_Idle(void)
 {
+  u8 au8UserMenuAndListDisplay[]="****************************************\n\rLED Programming Interface\n\rPress 1 to program LED command sequence\n\rPress 2 to show current USER program\n\r****************************************\n\r";
   static u8 auUserMenuandListDisplay[]="Enter command as LED-ONTIME-OFFTIME and press Enter\n\rTIME is in milliseconds,max 100 commands\n\rExample: R-100-200(Red on at 100ms and off at 200ms)\n\rPress Enter on blank line to end\n\r";
   static u8 auUserTips[]="If you want to add new command,input 3\n\r";
+  static u8 au8UserProgram[]="Current USER Program:";
+  static u8 au8DisplayName[]="LED  ON TIME    OFF TIME";
+  static u8 au8SymbolDisplay[]="-----------------------";
   static u8 auCheckProgramOrShow[1];                                           /*check input 1 or 2*/
   static u8 auCheckInput[1];                                                   /*check any factor*/
   static u8 u8CountMemberNumber=0;                                             /*check how many member had been input*/
@@ -198,7 +195,7 @@ static void UserApp1SM_Idle(void)
   static bool u8InputOffTimeCount=FALSE;
   static u8 u8CountInputOnTimeNumber=0; 
   static u8 u8CountInputOffTimeNumber=0;
-  static u8 u8LedError[]="Don't show which Led";
+  static u8 u8LedError[]="Wrong Led";
   static u8 u8InputMuchMark[]="Too much '-'";
   static u8 u8InputExtraSpace[]="Extra space ' '";
   static u8 u8MarkCount=0;
@@ -207,8 +204,13 @@ static void UserApp1SM_Idle(void)
   static bool bIfInputLed=FALSE;
   static bool bIfInputExtraSpace=FALSE;
   static u8 u8Countu8NumberOfUserList=0;
+  static bool bCountUI=TRUE;
 
-
+  if(bCountUI)
+  {
+      DebugPrintf(au8UserMenuAndListDisplay);
+      bCountUI=FALSE;
+  }
     
   if(G_u8DebugScanfCharCount==1)
   {
@@ -231,17 +233,30 @@ static void UserApp1SM_Idle(void)
       if(auCheckProgramOrShow[0]=='2'&&bBeginInputData==FALSE)                  /*Enter mode 2 to show list*/
       { 
         DebugPrintf("\n\r");
-        for(u8Countu8NumberOfUserList=u8NumberOfUserList;u8Countu8NumberOfUserList>1;u8Countu8NumberOfUserList--)
+        DebugPrintf(au8UserProgram);
+        DebugPrintf("\r\n");
+        DebugPrintf(au8DisplayName);
+        DebugPrintf("\r\n");
+        DebugPrintf(au8SymbolDisplay);
+        DebugPrintf("\r\n");
+        if(u8NumberOfUserList==0)
         {
           Output(u8NumberOfUserList);
         }
+        for(u8Countu8NumberOfUserList=u8NumberOfUserList;u8Countu8NumberOfUserList>0;u8Countu8NumberOfUserList--)
+        {
+          Output(u8NumberOfUserList);
+        }
+        DebugPrintf(au8SymbolDisplay);
+        DebugPrintf("\r\n");
         DebugPrintf(auUserTips);
         bCheckProgramOrShow=TRUE;
         auCheckInput[0]=0;
+        //u8NumberOfUserList=0;
       }
       
 
-      if(auCheckProgramOrShow[0]=='3'&&bBeginInputData==FALSE)                  /*Input again*/
+      if(auCheckProgramOrShow[0]=='3'&&bBeginInputData==FALSE)                  /*Enter mode 3 to input again*/
       {   
         DebugPrintf("\n\r");
         bCheckProgramOrShow=FALSE;
@@ -250,19 +265,19 @@ static void UserApp1SM_Idle(void)
       }
     
     
-       if(u8CountMemberNumber==1&&!u8InputOnTimeCount)
-       {
-          u8InputOnTimeCount=TRUE;
-          u32OnTime=0;
-          u8CountInputOnTimeNumber=0;
-       }
+     if(u8CountMemberNumber==1&&!u8InputOnTimeCount)                            /*open input On time lock*/
+     {
+        u8InputOnTimeCount=TRUE;
+        u32OnTime=0;
+        u8CountInputOnTimeNumber=0;
+     }
     
-      if(u8CountMemberNumber==2&&!u8InputOffTimeCount)
-      {
+     if(u8CountMemberNumber==2&&!u8InputOffTimeCount)                          /*open input Off time lock*/
+     {
          u8InputOffTimeCount=TRUE;
          u32OffTime=0;
          u8CountInputOffTimeNumber=0;
-      }
+     }
         
        DebugScanf(auCheckInput);
      /*input the first menber*/
@@ -347,7 +362,7 @@ static void UserApp1SM_Idle(void)
               }
            }
          
-             
+         
            /*input the on time*/
            if(u8InputOnTimeCount&&auCheckInput[0]!='-')
            {
@@ -362,7 +377,7 @@ static void UserApp1SM_Idle(void)
            }
            
          
-           /*input the of time*/
+           /*input the off time*/
            if(u8InputOffTimeCount&&auCheckInput[0]!='-'&&auCheckInput[0]!='\r')
            {  
                u32OffTime=u32OffTime*10+(auCheckInput[0]-48);
@@ -376,8 +391,9 @@ static void UserApp1SM_Idle(void)
                
            }
            
+        
           
-          /*Store the data into arrat*/
+          /*Store the data into array*/
           if(u8CountMemberNumber==3&&bIfInputLed&&!bIfInputMuchMark&&!bIfInputExtraSpace) 
           {   
               aeUserList[u8NumberOfUserList].eLED=eLED1;
@@ -401,6 +417,7 @@ static void UserApp1SM_Idle(void)
            {
               LedDisplayAddCommand(USER_LIST, &aeUserList[x]);
            }
+            
           }   
            if(auCheckInput[0]=='\r')
            {
