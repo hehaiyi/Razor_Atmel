@@ -85,9 +85,27 @@ Requires:
 Promises:
   - 
 */
+
+static u8 AntCalcuateChecksum(u8 *pu8TargetString,u8 u8Length)
+{
+  u8 u8Start = pu8TargetString[0];
+  u8 u8Count;
+  u8 u8CheckSum;
+  for(u8Count = 1;u8Count < u8Length-1;u8Count++)
+  {
+    u8CheckSum ^= u8Start;
+  }
+  return u8CheckSum;
+}
+
 void UserApp1Initialize(void)
 {
- 
+  u8 au8SetChannelPower[] = {0x45,2,0x47,0,4,CS};
+  u8 au8SetChannellD[] = {0XA4,5,0x51,1,0xef,0x12,1,50,CS};
+  
+  u8 u8SetChannelPowerCS,u8SetChannellDCS;
+  u8SetChannelPowerCS = AntCalcuateChecksum(au8SetChannelPower,sizeof(au8SetChannelPower)/sizeof(au8SetChannelPower)[0] );
+  u8SetChannellDCS = AntCalcuateChecksum(au8SetChannellD,sizeof(au8SetChannellD));
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -122,7 +140,6 @@ void UserApp1RunActiveState(void)
 
 } /* end UserApp1RunActiveState */
 
-
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -132,11 +149,11 @@ void UserApp1RunActiveState(void)
 State Machine Function Definitions
 **********************************************************************************************************************/
 
-/*-------------------------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------------------------*/
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+  
 } /* end UserApp1SM_Idle() */
     
 
