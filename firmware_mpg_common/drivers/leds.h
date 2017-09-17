@@ -22,7 +22,7 @@ Type Definitions
 
 /* %LED% The order of the LEDs in LedNumberType below must match the order of the definitions provided in leds_x.c */
 #ifdef MPGL1
-typedef enum {WHITE = 0, PURPLE, BLUE, CYAN, GREEN, YELLOW, ORANGE, RED, LCD_RED, LCD_GREEN, LCD_BLUE} LedNumberType;
+typedef enum {WHITE = 0, PURPLE, BLUE, CYAN, GREEN, YELLOW, ORANGE, RED, LCD_RED, LCD_GREEN, LCD_BLUE , LCD_ORANGE,LCD_PURPLE} LedNumberType;
 #endif
 
 #ifdef MPGL2

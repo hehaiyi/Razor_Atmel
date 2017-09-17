@@ -52,7 +52,8 @@ extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
 extern volatile u32 G_u32SystemTime1s;                 /* From board-specific source file */
 
-
+extern u8 G_au8DebugScanfBuffer[];
+extern u8 G_u8DebugScanfCharCount;
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_" and be declared as static.
@@ -90,7 +91,8 @@ void UserApp1Initialize(void)
  
   /* If good initialization, set state to Idle */
   if( 1 )
-  {    
+  {  
+   
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   else
@@ -137,7 +139,60 @@ State Machine Function Definitions
 static void UserApp1SM_Idle(void)
 {
 
-  
+      static bool bState1OrState2=TRUE;
+      static bool bShowOnceState=TRUE;
+      u8 au8StringState1[]="Entering state 1";
+      u8 au8StringState2[]="Entering state 2";
+      u8 au8State1Message[] = "STATE 1";
+      u8 au8State2Message[] = "STATE 2";
+      u8 DebugScanf() ;
+      
+      if(bState1OrState2&&bShowOnceState)
+      {
+          DebugPrintf(au8StringState1);
+          bShowOnceState=FALSE;
+      }
+      else if(!bState1OrState2&&bShowOnceState)
+      {
+          DebugPrintf(au8StringState2);
+          bShowOnceState=FALSE;
+      }
+      
+      if(bState1OrState2==TRUE)
+      {
+          LedOff(LCD_PURPLE);
+          LedOn(WHITE);
+          LedOn(PURPLE);
+          LedOn(BLUE);
+          LedOn(CYAN);
+         
+          LCDMessage(LINE1_START_ADDR+5,au8State1Message);
+      }
+      else if(bState1OrState2==FALSE)
+      {
+          LedBlink(GREEN,LED_1HZ);
+          LedBlink(YELLOW,LED_2HZ);
+          LedBlink(ORANGE,LED_4HZ);
+          LedBlink(RED,LED_8HZ);
+          LedOff(LCD_ORANGE);
+          
+          
+          LCDMessage(LINE1_START_ADDR+5,au8State2Message);
+      }
+      
+      if(WasButtonPressed(BUTTON2)||G_au8DebugScanfBuffer[0]==2)
+      {
+        ButtonAcknowledge(BUTTON2);  
+        bState1OrState2=FALSE;
+        bShowOnceState=TRUE;
+      } 
+      
+      if(WasButtonPressed(BUTTON1)||G_au8DebugScanfBuffer[0]==1)
+      {
+        ButtonAcknowledge(BUTTON1);  
+        bState1OrState2=TRUE;
+        bShowOnceState=TRUE;
+      }
 } /* end UserApp1SM_Idle() */
     
 #if 0
