@@ -91,9 +91,16 @@ void UserApp1Initialize(void)
  
   /* If good initialization, set state to Idle */
   if( 1 )
-  {  
-   
-    UserApp1_StateMachine = UserApp1SM_Idle;
+  { 
+      PWMAudioOff(BUZZER1); 
+      LedOff(WHITE);
+      LedOff(GREEN);
+      LedOff(RED);
+      LedOff(BLUE);
+      LedOff(PURPLE);
+      LedOff(CYAN);
+      LedOff(YELLOW);
+      UserApp1_StateMachine = UserApp1SM_Idle;
   }
   else
   {
@@ -138,60 +145,80 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
-      static bool bState1OrState2=TRUE;
-      static bool bShowOnceState=TRUE;
+      static u16 u16TimeCounter1=0;
       u8 au8StringState1[]="Entering state 1";
       u8 au8StringState2[]="Entering state 2";
       u8 au8State1Message[] = "STATE 1";
       u8 au8State2Message[] = "STATE 2";
-      u8 DebugScanf() ;
+      static u8 auArray[1];
+      DebugScanf(auArray);
+      static bool bIfBuzzer=TRUE;     
+      u16TimeCounter1++;
       
-      if(bState1OrState2&&bShowOnceState)
+      if(!bIfBuzzer)  
       {
-          DebugPrintf(au8StringState1);
-          bShowOnceState=FALSE;
+          PWMAudioSetFrequency(BUZZER1, 200);
+          if(u16TimeCounter1==100)
+          {
+              PWMAudioOff(BUZZER1);  
+          }
+          if(u16TimeCounter1==1000)
+          {  
+              PWMAudioOn(BUZZER1);
+              u16TimeCounter1=0;
+          }
       }
-      else if(!bState1OrState2&&bShowOnceState)
+      
+      
+      if(WasButtonPressed(BUTTON2)||auArray[0]=='2')
       {
+          u16TimeCounter1=0;
+          bIfBuzzer=FALSE;
+          
+          ButtonAcknowledge(BUTTON2);  
+          auArray[0]=0;     
           DebugPrintf(au8StringState2);
-          bShowOnceState=FALSE;
-      }
-      
-      if(bState1OrState2==TRUE)
-      {
-          LedOff(LCD_PURPLE);
-          LedOn(WHITE);
-          LedOn(PURPLE);
-          LedOn(BLUE);
-          LedOn(CYAN);
-         
-          LCDMessage(LINE1_START_ADDR+5,au8State1Message);
-      }
-      else if(bState1OrState2==FALSE)
-      {
+          DebugLineFeed();
+                    
           LedBlink(GREEN,LED_1HZ);
           LedBlink(YELLOW,LED_2HZ);
           LedBlink(ORANGE,LED_4HZ);
           LedBlink(RED,LED_8HZ);
-          LedOff(LCD_ORANGE);
+          LedOff(WHITE);
+          LedOff(PURPLE);
+          LedOff(BLUE);
+          LedOff(CYAN);
+          LedPWM(LCD_RED,LED_PWM_55);
+          LedPWM(LCD_GREEN,LED_PWM_30);
+          LedPWM(LCD_BLUE,LED_PWM_15);
           
-          
-          LCDMessage(LINE1_START_ADDR+5,au8State2Message);
+          LCDCommand(LCD_CLEAR_CMD);
+          LCDMessage(LINE1_START_ADDR+8,au8State2Message);
       }
       
-      if(WasButtonPressed(BUTTON2)||G_au8DebugScanfBuffer[0]==2)
+      if(WasButtonPressed(BUTTON1)||auArray[0]=='1')
       {
-        ButtonAcknowledge(BUTTON2);  
-        bState1OrState2=FALSE;
-        bShowOnceState=TRUE;
-      } 
-      
-      if(WasButtonPressed(BUTTON1)||G_au8DebugScanfBuffer[0]==1)
-      {
-        ButtonAcknowledge(BUTTON1);  
-        bState1OrState2=TRUE;
-        bShowOnceState=TRUE;
+          ButtonAcknowledge(BUTTON1);  
+          auArray[0]=0; 
+          DebugPrintf(au8StringState1);
+          DebugLineFeed();
+
+          LedOn(WHITE);
+          LedOn(PURPLE);
+          LedOn(BLUE);
+          LedOn(CYAN);
+          LedOff(GREEN);
+          LedOff(YELLOW);
+          LedOff(ORANGE);
+          LedOff(RED);
+          LedPWM(LCD_RED,LED_PWM_35);
+          LedPWM(LCD_GREEN,LED_PWM_20);
+          LedPWM(LCD_BLUE,LED_PWM_45);
+          bIfBuzzer=TRUE;
+          
+          LCDCommand(LCD_CLEAR_CMD);
+          LCDMessage(LINE1_START_ADDR+8,au8State1Message);
+          
       }
 } /* end UserApp1SM_Idle() */
     
