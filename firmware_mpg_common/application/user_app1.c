@@ -104,8 +104,8 @@ void UserApp1Initialize(void)
   u8 au8SetChannellD[] = {0XA4,5,0x51,1,0xef,0x12,1,50,CS};
   
   u8 u8SetChannelPowerCS,u8SetChannellDCS;
-  u8SetChannelPowerCS = AntCalcuateChecksum(au8SetChannelPower,sizeof(au8SetChannelPower)/sizeof(au8SetChannelPower)[0] );
-  u8SetChannellDCS = AntCalcuateChecksum(au8SetChannellD,sizeof(au8SetChannellD));
+  u8SetChannelPowerCS = AntCalcuateChecksum(au8SetChannelPower,sizeof(au8SetChannelPower)/sizeof(au8SetChannelPower[0]) );
+  u8SetChannellDCS = AntCalcuateChecksum(au8SetChannellD,sizeof(au8SetChannellD)/sizeof(au8SetChannellD[0]));
   /* If good initialization, set state to Idle */
   if( 1 )
   {
