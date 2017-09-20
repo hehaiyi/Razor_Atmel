@@ -126,7 +126,35 @@ void UserApp1RunActiveState(void)
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
+static void UserAppSM_State1(void)
+{
+    static u8 u8String1[]="Entering State1";
+  
+    DebugPrintf(u8String1);
+    LedOn(WHITE);
+    LedOn(PURPLE);
+    LedOn(BLUE);
+    LedOn(CYAN);
+    LedPWM(LCD_RED, LED_PWM_100);
+    LedPWM(LCD_BLUE,LED_PWM_100);
+    LedPWM(LCD_GREEN, LED_PWM_0);
 
+    PWMAudioOff(BUZZER1);
+
+    UserApp1_StateMachine = UserApp1SM_Idle;
+}
+
+static void UserAppSM_State2(void)
+{
+    static u8 u8String2[]="Entering State1";
+    DebugPrintf(u8String2);
+    
+    
+    LedPWM(LCD_RED, LED_PWM_100);
+    LedPWM(LCD_BLUE,LED_PWM_0);
+    LedPWM(LCD_GREEN, LED_PWM_50);
+    UserApp1_StateMachine = UserApp1SM_Idle;
+}
 
 /**********************************************************************************************************************
 State Machine Function Definitions
@@ -136,20 +164,18 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-  bool IsButtonHeld(BUTTON3, 2000);
-  
-  
-  if(IsButtonHeld(BUTTON3, 2000))
-  {
-    LedBlink(GREEN, LED_1HZ)
-    LedBlink(RED, LED_1HZ)
-    
-  }
-  
-  if()
-  
-  
-  
+    if(WasButtonPressed(BUTTON1))
+    {
+    ButtonAcknowledge(BUTTON1);      
+    UserApp1_StateMachine = UserAppSM_State1;
+    }
+
+    if(WasButtonPressed(BUTTON2))
+    {
+    ButtonAcknowledge(BUTTON2);      
+    UserApp1_StateMachine = UserAppSM_State2;
+    }
+ 
 } /* end UserApp1SM_Idle() */
     
 #if 0
