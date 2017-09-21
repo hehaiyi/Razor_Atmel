@@ -86,6 +86,9 @@ Requires:
 Promises:
   - 
 */
+static void UserAPP1_state1(void);
+static void UserAPP1_state2(void);
+
 void UserApp1Initialize(void)
 {
  
@@ -143,17 +146,82 @@ State Machine Function Definitions
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for ??? */
+static bool bIfBuzzerOn=FALSE;                                   /*Turn on Buzzer or Turn off Buzzer*/
+static u16 u16TimeCounter=0;                                     /*to judge Buzzer On or Off*/
 static void UserApp1SM_Idle(void)
 {
+      static u8 au8Commend[1];
+      static bool bState1=FALSE;                                 /*to make the state1 only run once*/
+      static bool bState2=FALSE;                                 /*to make the state1 only run once*/
+      
+      u16TimeCounter++;
+      DebugScanf(au8Commend);
+      
+      /*state1*/
+      if(WasButtonPressed(BUTTON1))                             /*Button1 Control*/
+      {
+          ButtonAcknowledge(BUTTON1);
+          UserApp1_StateMachine=UserAPP1_state1;
+      }
+      
+      if(au8Commend[0]=='1')                                    /*Tera Control*/
+      {   
+        bState1=TRUE;                                           /*into the State1*/
+      }
+      
+      if(au8Commend[0]=='\r'&&bState1)
+      {
+          bState1=FALSE;
+          UserApp1_StateMachine=UserAPP1_state1;
+      }
+      
+      /*state2*/
+      if(WasButtonPressed(BUTTON2))                             /*Button2 Control*/
+      {
+          ButtonAcknowledge(BUTTON2);
+          UserApp1_StateMachine=UserAPP1_state2;
+      }
+      
+      if(au8Commend[0]=='2')                                    /*Tera Control*/
+      {   
+          bState2=TRUE;                                         /*into the State2*/
+      }
+      
+      if(au8Commend[0]=='\r'&&bState2)
+      {
+          bState2=FALSE;
+          UserApp1_StateMachine=UserAPP1_state2;
+      }
+  
+      /*Function of Buzzer*/
+      if(bIfBuzzerOn)
+      {    
+          PWMAudioSetFrequency(BUZZER1, 200);
+          
+          if(u16TimeCounter==10)
+          {
+              PWMAudioOff(BUZZER1);  
+          }
+          
+          if(u16TimeCounter==1000)
+          {  
+              PWMAudioOn(BUZZER1);
+              u16TimeCounter=0;
+          }
+      } 
+   
+    /*This is my first version without StateMachine*/
+    /*  
       static u16 u16TimeCounter1=0;
       u8 au8StringState1[]="Entering state 1";
       u8 au8StringState2[]="Entering state 2";
       u8 au8State1Message[] = "STATE 1";
       u8 au8State2Message[] = "STATE 2";
       static u8 auArray[1];
-      DebugScanf(auArray);
       static bool bIfBuzzer=TRUE;     
+      
       u16TimeCounter1++;
+      DebugScanf(auArray);
       
       if(!bIfBuzzer)  
       {
@@ -219,7 +287,7 @@ static void UserApp1SM_Idle(void)
           LCDCommand(LCD_CLEAR_CMD);
           LCDMessage(LINE1_START_ADDR+8,au8State1Message);
           
-      }
+      }*/
 } /* end UserApp1SM_Idle() */
     
 #if 0
@@ -231,6 +299,67 @@ static void UserApp1SM_Error(void)
 } /* end UserApp1SM_Error() */
 #endif
 
+
+
+static void UserAPP1_state1(void)
+{
+          bIfBuzzerOn=FALSE;                                      /*Turn off the Buzzer*/
+         
+          DebugPrintf("Entering state 1");
+          DebugLineFeed();
+          
+          /*function of Led*/
+          LedOn(WHITE);
+          LedOn(PURPLE);
+          LedOn(BLUE);
+          LedOn(CYAN);
+          LedOff(GREEN);
+          LedOff(YELLOW);
+          LedOff(ORANGE);
+          LedOff(RED);
+          LedPWM(LCD_RED,LED_PWM_35);
+          LedPWM(LCD_GREEN,LED_PWM_20);
+          LedPWM(LCD_BLUE,LED_PWM_45);
+          
+          /*function of Lcd*/          
+          LCDCommand(LCD_CLEAR_CMD);
+          LCDMessage(LINE1_START_ADDR+7,"STATE 1");
+          
+          /*Back to the UserApp1SM_Idle()*/
+          UserApp1_StateMachine=UserApp1SM_Idle;                
+  
+}
+
+
+
+static void UserAPP1_state2(void)
+{
+          u16TimeCounter=0;                                        /*Restart the counter*/
+          bIfBuzzerOn=TRUE;                                        /*Turn on the buzzer*/ 
+               
+          DebugPrintf("Entering state 2");
+          DebugLineFeed();
+           
+          /*function of Led*/
+          LedBlink(GREEN,LED_1HZ);
+          LedBlink(YELLOW,LED_2HZ);
+          LedBlink(ORANGE,LED_4HZ);
+          LedBlink(RED,LED_8HZ);
+          LedOff(WHITE);
+          LedOff(PURPLE);
+          LedOff(BLUE);
+          LedOff(CYAN);
+          LedPWM(LCD_RED,LED_PWM_55);
+          LedPWM(LCD_GREEN,LED_PWM_30);
+          LedPWM(LCD_BLUE,LED_PWM_15);
+          
+          /*function of Lcd*/
+          LCDCommand(LCD_CLEAR_CMD);
+          LCDMessage(LINE1_START_ADDR+7,"STATE 2");
+          
+          /*Back to the UserApp1SM_Idle()*/
+          UserApp1_StateMachine=UserApp1SM_Idle;
+}
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* State to sit in if init failed */
