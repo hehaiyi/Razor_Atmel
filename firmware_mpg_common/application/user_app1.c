@@ -64,7 +64,8 @@ static fnCode_type UserApp1_StateMachine;            /* The state machine functi
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
-
+bool bIsState2 = FALSE;
+bool bState2 = FALSE;
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Public functions                                                                                                   */
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -75,7 +76,7 @@ Function Definitions
 
 /*--------------------------------------------------------------------------------------------------------------------
 Function: UserApp1Initialize
-
+2
 Description:
 Initializes the State Machine and its variables.
 
@@ -87,7 +88,7 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-    PWMAudioSetFrequency(BUZZER2, 200);
+    PWMAudioSetFrequency(BUZZER1, 200);
  
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -160,24 +161,28 @@ static void UserAppSM_State2(void)
 {
     static u8 au8String2[]="Entering State2";
     static u8 au8Message2[]="State 1";
-    DebugPrintf(au8String2);
-    LCDMessage(LINE1_START_ADDR, au8Message2);
     static u16 u16Count = 0;
-    u16 u16Sum = 1000;
-    
-    LedOff(WHITE);
-    LedOff(PURPLE);
-    LedOff(BLUE);
-    LedOff(CYAN);
-    LedBlink(GREEN,LED_1HZ);
-    LedBlink(YELLOW,LED_2HZ);
-    LedBlink(ORANGE,LED_4HZ);
-    LedBlink(RED,LED_8HZ);
-    
-    
-    LedPWM(LCD_RED, LED_PWM_100);
-    LedPWM(LCD_BLUE,LED_PWM_0);
-    LedPWM(LCD_GREEN, LED_PWM_50);
+    u16 u16Sum = 500;
+    u16Count++;
+    if(bState2)
+    {
+      bState2 = FALSE;
+      DebugPrintf(au8String2);
+      LCDMessage(LINE1_START_ADDR, au8Message2);
+      LedOff(WHITE);
+      LedOff(PURPLE);
+      LedOff(BLUE);
+      LedOff(CYAN);
+      LedBlink(GREEN,LED_1HZ);
+      LedBlink(YELLOW,LED_2HZ);
+      LedBlink(ORANGE,LED_4HZ);
+      LedBlink(RED,LED_8HZ);
+
+
+      LedPWM(LCD_RED, LED_PWM_100);
+      LedPWM(LCD_BLUE,LED_PWM_0);
+      LedPWM(LCD_GREEN, LED_PWM_50);
+    }
     
 /*
     for(u8Count = 0;u8Count <= u8Sum;u8Count++)
@@ -192,16 +197,17 @@ static void UserAppSM_State2(void)
 */
 
     /*the condition to the BUZZER*/
-    if(u16Count <= u16Sum)
-    {
-        if(u16Count <= 100)
+    
+
+        if(u16Count == 50)
         {
-            PWMAudioOn(BUZZER1);
+            PWMAudioOff(BUZZER1);
         }
-    }
-    else
+   
+    if(u16Count >= u16Sum)
     {
         u16Count = 0;
+        PWMAudioOn(BUZZER1);
     }
     
     
@@ -223,7 +229,8 @@ static void UserApp1SM_Idle(void)
     /*define two different states and the condition to the two states*/
     if(WasButtonPressed(BUTTON1))
     {
-    ButtonAcknowledge(BUTTON1);      
+    ButtonAcknowledge(BUTTON1);  
+    bIsState2 = FALSE;    
     UserApp1_StateMachine = UserAppSM_State1;
     }
 
@@ -231,8 +238,14 @@ static void UserApp1SM_Idle(void)
     {
     ButtonAcknowledge(BUTTON2);      
     UserApp1_StateMachine = UserAppSM_State2;
+    bIsState2 = TRUE;
+    bState2 = TRUE;
     }
- 
+    if(bIsState2){
+       
+        UserApp1_StateMachine = UserAppSM_State2;
+      
+    }
 } /* end UserApp1SM_Idle() */
     
 #if 0
