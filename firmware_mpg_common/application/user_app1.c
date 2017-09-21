@@ -87,6 +87,7 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+    
  
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -128,31 +129,82 @@ void UserApp1RunActiveState(void)
 /*--------------------------------------------------------------------------------------------------------------------*/
 static void UserAppSM_State1(void)
 {
-    static u8 u8String1[]="Entering State1";
+    static u8 au8String1[]="Entering State1";
+    static u8 au8Message1[]="State 1";
   
-    DebugPrintf(u8String1);
+    DebugPrintf(au8String1);
+    LCDMessage(LINE1_START_ADDR, au8Message1);
     LedOn(WHITE);
     LedOn(PURPLE);
     LedOn(BLUE);
     LedOn(CYAN);
+    LedOff(GREEN);
+    LedOff(YELLOW);
+    LedOff(ORANGE);
+    LedOff(RED);
     LedPWM(LCD_RED, LED_PWM_100);
     LedPWM(LCD_BLUE,LED_PWM_100);
     LedPWM(LCD_GREEN, LED_PWM_0);
+    
 
     PWMAudioOff(BUZZER1);
+    PWMAudioOff(BUZZER2);    
 
     UserApp1_StateMachine = UserApp1SM_Idle;
 }
 
 static void UserAppSM_State2(void)
 {
-    static u8 u8String2[]="Entering State1";
-    DebugPrintf(u8String2);
+    static u8 au8String2[]="Entering State2";
+    static u8 au8Message2[]="State 1";
+    DebugPrintf(au8String2);
+    LCDMessage(LINE1_START_ADDR, au8Message2);
+    static u8 u8Count = 0;
+    u8 u8Sum = 1000;
+    
+    LedOff(WHITE);
+    LedOff(PURPLE);
+    LedOff(BLUE);
+    LedOff(CYAN);
+    LedBlink(GREEN,LED_1HZ);
+    LedBlink(YELLOW,LED_2HZ);
+    LedBlink(ORANGE,LED_4HZ);
+    LedBlink(RED,LED_8HZ);
     
     
     LedPWM(LCD_RED, LED_PWM_100);
-    LedPWM(LCD_BLUE,LED_PWM_0);
     LedPWM(LCD_GREEN, LED_PWM_50);
+    
+/*
+    for(u8Count = 0;u8Count <= u8Sum;u8Count++)
+    {
+        if(u8Count <= 100)
+        {
+            PWMAudioSetFrequency(BUZZER1, 200);
+        }
+        else
+    }
+     u8Count = 0;
+*/
+
+    
+    if(u8Count <= u8Sum)
+    {
+        if(u8Count <= 100)
+        {
+            PWMAudioSetFrequency(BUZZER2, 200);
+        }
+    }
+    else
+    {
+        u8Count = 0;
+    }
+    
+    
+    
+    
+
+    
     UserApp1_StateMachine = UserApp1SM_Idle;
 }
 
