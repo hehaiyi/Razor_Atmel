@@ -87,7 +87,7 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-    
+    PWMAudioSetFrequency(BUZZER2, 200);
  
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -129,9 +129,11 @@ void UserApp1RunActiveState(void)
 /*--------------------------------------------------------------------------------------------------------------------*/
 static void UserAppSM_State1(void)
 {
+    /*State 1*/
     static u8 au8String1[]="Entering State1";
     static u8 au8Message1[]="State 1";
-  
+
+    /*The requirements*/
     DebugPrintf(au8String1);
     LCDMessage(LINE1_START_ADDR, au8Message1);
     LedOn(WHITE);
@@ -150,6 +152,7 @@ static void UserAppSM_State1(void)
     PWMAudioOff(BUZZER1);
     PWMAudioOff(BUZZER2);    
 
+    /*back to idle to go to the next state*/
     UserApp1_StateMachine = UserApp1SM_Idle;
 }
 
@@ -159,8 +162,8 @@ static void UserAppSM_State2(void)
     static u8 au8Message2[]="State 1";
     DebugPrintf(au8String2);
     LCDMessage(LINE1_START_ADDR, au8Message2);
-    static u8 u8Count = 0;
-    u8 u8Sum = 1000;
+    static u16 u16Count = 0;
+    u16 u16Sum = 1000;
     
     LedOff(WHITE);
     LedOff(PURPLE);
@@ -173,6 +176,7 @@ static void UserAppSM_State2(void)
     
     
     LedPWM(LCD_RED, LED_PWM_100);
+    LedPWM(LCD_BLUE,LED_PWM_0);
     LedPWM(LCD_GREEN, LED_PWM_50);
     
 /*
@@ -187,24 +191,24 @@ static void UserAppSM_State2(void)
      u8Count = 0;
 */
 
-    
-    if(u8Count <= u8Sum)
+    /*the condition to the BUZZER*/
+    if(u16Count <= u16Sum)
     {
-        if(u8Count <= 100)
+        if(u16Count <= 100)
         {
-            PWMAudioSetFrequency(BUZZER2, 200);
+            PWMAudioOn(BUZZER1);
         }
     }
     else
     {
-        u8Count = 0;
+        u16Count = 0;
     }
     
     
     
     
 
-    
+    /*back to idle to go to the next state*/
     UserApp1_StateMachine = UserApp1SM_Idle;
 }
 
@@ -216,6 +220,7 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+    /*define two different states and the condition to the two states*/
     if(WasButtonPressed(BUTTON1))
     {
     ButtonAcknowledge(BUTTON1);      
