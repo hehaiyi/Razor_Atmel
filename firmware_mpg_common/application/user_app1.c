@@ -192,19 +192,7 @@ static void UserAppSM_State2(void)
       LedPWM(LCD_GREEN, LED_PWM_50);
     }
     
-/*
-    for(u8Count = 0;u8Count <= u8Sum;u8Count++)
-    {
-        if(u8Count <= 100)
-        {
-            PWMAudioSetFrequency(BUZZER1, 200);
-        }
-        else
-    }
-     u8Count = 0;
-*/
 
-    /*the condition to the BUZZER*/
     
 
         if(u16Count == 50)
@@ -240,25 +228,52 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+  
+    static u8 au8String3[2];
+    static u8 au8Data[2];
+    static u8 u8Counter;
+    static u8 u8DataCount = 0;
+    
+    
+    u8Counter = DebugScanf(au8String3);
+    if(u8Counter > 0)
+    {
+        au8Data[u8DataCount] = au8String3[0];
+        u8DataCount++;
+    }
+    if(u8DataCount == 2)
+    {
+        if(au8Data[0] == 1 && au8Data[1] == '\r')
+        {
+            bIsState2 = FALSE;    
+            UserApp1_StateMachine = UserAppSM_State1;
+        }
+        if(au8Data[1] == 2 && au8Data[1] == '\r')
+        {
+            UserApp1_StateMachine = UserAppSM_State2;
+            bIsState2 = TRUE;
+            bState2 = TRUE;
+        }
+        u8DataCount = 0;
+    }
     /*define two different states and the condition to the two states*/
     if(WasButtonPressed(BUTTON1))
     {
-    ButtonAcknowledge(BUTTON1);  
-    bIsState2 = FALSE;    
-    UserApp1_StateMachine = UserAppSM_State1;
+        ButtonAcknowledge(BUTTON1);  
+        bIsState2 = FALSE;    
+        UserApp1_StateMachine = UserAppSM_State1;
     }
 
     if(WasButtonPressed(BUTTON2))
     {
-    ButtonAcknowledge(BUTTON2);      
-    UserApp1_StateMachine = UserAppSM_State2;
-    bIsState2 = TRUE;
-    bState2 = TRUE;
-    }
-    if(bIsState2){
-       
+        ButtonAcknowledge(BUTTON2);      
         UserApp1_StateMachine = UserAppSM_State2;
-      
+        bIsState2 = TRUE;
+        bState2 = TRUE;
+    }
+    if(bIsState2)
+    {
+       UserApp1_StateMachine = UserAppSM_State2;  
     }
 } /* end UserApp1SM_Idle() */
     
