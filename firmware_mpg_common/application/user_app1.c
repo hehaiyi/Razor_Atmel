@@ -228,20 +228,20 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-  
-    static u8 au8String3[2];
-    static u8 au8Data[2];
-    static u8 u8Counter;
-    static u8 u8DataCount = 0;
+    /*Input the '1' or '2' and '\r' to enter the different states*/
+    static u8 au8String3[2];  /*Define a string to record to character that be input*/
+    static u8 au8Data[2];  /*Define a string to store the characte that be input*/
+    static u8 u8Counter;   /*To count the number of the character in the String3*/
+    static u8 u8DataCount = 0;  /*To count the number of the character in the DataCount*/
     
     
     u8Counter = DebugScanf(au8String3);
-    if(u8Counter > 0)
+    if(u8Counter > 0)/*To make sure that the character has been input*/
     {
         au8Data[u8DataCount] = au8String3[0];
         u8DataCount++;
     }
-    if(u8DataCount == 2)
+    if(u8DataCount == 2)/*Input two characters*/
     {
         if(au8Data[0] == ('0'+1) && au8Data[1] == '\r')
         {
