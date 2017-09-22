@@ -243,12 +243,12 @@ static void UserApp1SM_Idle(void)
     }
     if(u8DataCount == 2)
     {
-        if(au8Data[0] == 1 && au8Data[1] == '\r')
+        if(au8Data[0] == ('0'+1) && au8Data[1] == '\r')
         {
             bIsState2 = FALSE;    
             UserApp1_StateMachine = UserAppSM_State1;
         }
-        if(au8Data[1] == 2 && au8Data[1] == '\r')
+        if(au8Data[0] == '2' && au8Data[1] == '\r')
         {
             UserApp1_StateMachine = UserAppSM_State2;
             bIsState2 = TRUE;
@@ -256,6 +256,7 @@ static void UserApp1SM_Idle(void)
         }
         u8DataCount = 0;
     }
+   
     /*define two different states and the condition to the two states*/
     if(WasButtonPressed(BUTTON1))
     {
@@ -271,6 +272,8 @@ static void UserApp1SM_Idle(void)
         bIsState2 = TRUE;
         bState2 = TRUE;
     }
+   
+    
     if(bIsState2)
     {
        UserApp1_StateMachine = UserAppSM_State2;  
