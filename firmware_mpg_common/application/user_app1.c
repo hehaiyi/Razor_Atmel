@@ -235,6 +235,8 @@ static void UserApp1SM_Idle(void)
     static u8 u8DataCount = 0;  /*To count the number of the character in the DataCount*/
     
     
+    
+    
     u8Counter = DebugScanf(au8String3);
     if(u8Counter > 0)/*To make sure that the character has been input*/
     {
