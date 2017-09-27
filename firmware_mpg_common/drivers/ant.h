@@ -10,7 +10,7 @@ Search "####" for ANT Channel ID defaults
 
 #ifndef __ANT_H
 #define __ANT_H
-
+#define CS (u8)0
 
 /*******************************************************************************
 * Type definitions

@@ -90,7 +90,11 @@ void UserApp1Initialize(void)
  
   /* If good initialization, set state to Idle */
   if( 1 )
-  {    
+  { LedOff(RED);
+    LedOff(GREEN);  
+    LedOff(YELLOW);
+    LedOff(WHITE);
+    AntCalculateChecksum();
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   else
@@ -126,7 +130,41 @@ void UserApp1RunActiveState(void)
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
+void AntCalculateChecksum()
+{
+  u8 au8SetChannelPower[]={0xA5,2,0x47,0,4,CS};
+  u8 au8SetChannelID[]={0xA4,5,0x51,1,0xef,0x12,1,50,CS};
+  u8 *pGetPowerMessage=au8SetChannelPower;
+  u8 *pGetIDMessage=au8SetChannelID;
 
+  for(u8 u8count=0;u8count<5;u8count++)
+  {
+    *pGetPowerMessage=*pGetPowerMessage^*(pGetPowerMessage+u8count+1);          /*XOR operation*/
+  }
+  
+  if(*pGetPowerMessage==CS)                                                     /*Judge the result equal CS or not*/
+  {
+    LedOn(RED);
+  }
+  else
+  {
+    LedOn(GREEN);
+  }
+  
+  for(u8 u8count=0;u8count<8;u8count++)
+  {
+    *pGetIDMessage=*pGetIDMessage^*(pGetIDMessage+u8count+1);                   /*XOR operation*/
+  }
+  
+  if(*pGetIDMessage==CS)                                                        /*Judge the result equal CS or not*/
+  {
+    LedOn(WHITE);
+  }
+  else
+  {
+    LedOn(YELLOW);
+  }
+}
 
 /**********************************************************************************************************************
 State Machine Function Definitions

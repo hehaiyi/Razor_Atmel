@@ -44,7 +44,7 @@ Function Declarations
 /*--------------------------------------------------------------------------------------------------------------------*/
 void UserApp1Initialize(void);
 void UserApp1RunActiveState(void);
-
+void AntCalculateChecksum(void);
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
