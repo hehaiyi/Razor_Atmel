@@ -925,7 +925,8 @@ bool AntQueueOutgoingMessage(u8 *pu8Message_)
   AntOutgoingMessageListType *psNewDataMessage;
   AntOutgoingMessageListType *psListParser;
   u8 au8AddMessageFailMsg[] = "\n\rNo space in AntQueueOutgoingMessage\n\r";
-  
+ 
+    
   Ant_DebugQueuedDataMessages++;
 
   /* Allocate space for the new message - always do maximum message size */
@@ -1035,6 +1036,7 @@ static u8 AntProcessMessage(void)
 {
   u8 u8MessageLength;
   u8 au8MessageCopy[MESG_MAX_SIZE];
+
   
    /* Exit immediately if there are no messages in the RxBuffer */
 	if (!Ant_u8AntNewRxMessages)
@@ -1127,10 +1129,9 @@ static u8 AntProcessMessage(void)
             {
               if(++Ant_u8SlaveMissedMessageMid == 0)
               {
-                ++Ant_u8SlaveMissedMessageHigh;
+                ++Ant_u8SlaveMissedMessageMid;
               }
             }
-            
             /* Indication of this event still occurs at the ANT message period, so 
             an ANT_TICK message should be queued to the application message list.
             Overwrite au8MessageCopy with the ANT_TICK message data. */

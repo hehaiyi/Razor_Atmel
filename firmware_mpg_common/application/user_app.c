@@ -51,7 +51,7 @@ extern AntSetupDataType G_stAntSetupData;                         /* From ant.c 
 extern u32 G_u32AntApiCurrentDataTimeStamp;                       /* From ant_api.c */
 extern AntApplicationMessageType G_eAntApiCurrentMessageClass;    /* From ant_api.c */
 extern u8 G_au8AntApiCurrentData[ANT_APPLICATION_MESSAGE_BYTES];  /* From ant_api.c */
-
+extern u8 G_au8AntApiCurrentMessageBytes[ANT_APPLICATION_MESSAGE_BYTES];
 extern volatile u32 G_u32SystemFlags;                  /* From main.c */
 extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
 
@@ -169,11 +169,13 @@ State Machine Function Definitions
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
-  static u8 au8TestMessage[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
+  static u8 au8TestMessage[] = {0x5B, 0, 0, 0, 0xA5, 0, 0, 0};
   u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
+  u8 au8DisplayTotalMessages[]="xxxxxxxxxxxxxxxx";
+  
   
   /* Check all the buttons and update au8TestMessage according to the button state */ 
-  au8TestMessage[0] = 0x00;
+ /* au8TestMessage[0] = 0x00;
   if( IsButtonPressed(BUTTON0) )
   {
     au8TestMessage[0] = 0xff;
@@ -183,7 +185,7 @@ static void UserAppSM_Idle(void)
   if( IsButtonPressed(BUTTON1) )
   {
     au8TestMessage[1] = 0xff;
-  }
+  }*/
 
 #ifdef MPG1
   au8TestMessage[2] = 0x00;
@@ -231,9 +233,49 @@ static void UserAppSM_Idle(void)
           au8TestMessage[5]++;
         }
       }
-      AntQueueBroadcastMessage(au8TestMessage);
+      AntQueueAcknowledgedMessage(au8TestMessage);
     }
+  
+    /*if(au8MessageCopy[BUFFER_INDEX_RESPONSE_CODE]==EVENT_RX_FAIL)
+    {
+      au8DisplayTotalMessages[3]++;
+      if(au8DisplayTotalMessages[3] == 0)
+      {
+        au8DisplayTotalMessages[2]++;
+        if(au8DisplayTotalMessages[2] == 0)
+        {
+          au8DisplayTotalMessages[1]++;
+        }
+      }
+    }*/
+    if(!AntQueueAcknowledgedMessage(au8TestMessage))
+    {
+      au8DisplayTotalMessages[3]++;
+      if(au8DisplayTotalMessages[3] == 0)
+      {
+        au8DisplayTotalMessages[2]++;
+        if(au8DisplayTotalMessages[2] == 0)
+        {
+          au8DisplayTotalMessages[1]++;
+        }
+      }
+    }
+    
+    /*
+    au8DisplayTotalMessages[1]=G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_MISSED_HIGH_BYTE_INDEX];
+    au8DisplayTotalMessages[2]=G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_MISSED_MID_BYTE_INDEX];
+    au8DisplayTotalMessages[3]=G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_MISSED_LOW_BYTE_INDEX];
+    */
+    for(u8 i = 0; i < ANT_DATA_BYTES; i++)
+    {
+      au8DisplayTotalMessages[2 * i]     = HexToASCIICharUpper(au8TestMessage[i] / 16);
+      au8DisplayTotalMessages[2 * i + 1] = HexToASCIICharUpper(au8TestMessage[i] % 16);
+    }
+    
+    LCDClearChars(LINE2_START_ADDR, 20); 
+    LCDMessage(LINE2_START_ADDR, au8DisplayTotalMessages);
   } /* end AntReadData() */
+
   
 } /* end UserAppSM_Idle() */
 

@@ -145,7 +145,7 @@ Global variable definitions with scope across entire project.
 All Global variable names shall start with "G_<type>AntApi"
 ***********************************************************************************************************************/
 u32 G_u32AntApiCurrentDataTimeStamp = 0;                                /* Current read message's G_u32SystemTime1ms */
-
+u8 G_au8AntApiCurrentMessageBytes[ANT_APPLICATION_MESSAGE_BYTES];
 AntApplicationMessageType G_eAntApiCurrentMessageClass = ANT_EMPTY;     /* Type of data */
 u8 G_au8AntApiCurrentData[ANT_APPLICATION_MESSAGE_BYTES];               /* Array for message data */
 
