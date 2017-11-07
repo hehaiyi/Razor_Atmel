@@ -42,7 +42,7 @@ All Global variable names shall start with "G_"
 ***********************************************************************************************************************/
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                       /* Global state flags */
-
+AntAssignChannelInfoType sAntSetupData;
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
@@ -97,7 +97,6 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  AntAssignChannelInfoType sAntSetupData;
   
   u8 au8Title[] = "Hide and Seek";
   u8 au8Instructions[] = "B0 Begin Game";
@@ -106,50 +105,25 @@ void UserApp1Initialize(void)
   LCDMessage(LINE1_START_ADDR, au8Title); 
   LCDMessage(LINE2_START_ADDR, au8Instructions);
 
-  if(WasButtonPressed(BUTTON0))
+  /* Configure ANT for this application */
+  sAntSetupData.AntChannel          = ANT_CHANNEL_USERAPP;
+  sAntSetupData.AntChannelType      = CHANNEL_TYPE_SLAVE;
+  sAntSetupData.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
+  sAntSetupData.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
+
+  sAntSetupData.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
+  sAntSetupData.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
+  sAntSetupData.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
+  sAntSetupData.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
+  sAntSetupData.AntFrequency        = ANT_FREQUENCY_USERAPP;
+  sAntSetupData.AntTxPower          = ANT_TX_POWER_USERAPP;
+
+  sAntSetupData.AntNetwork = ANT_NETWORK_DEFAULT;
+  for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
   {
-    ButtonAcknowledge(BUTTON0);
-    /* Configure ANT for this application */
-    sAntSetupData.AntChannel          = ANT_CHANNEL_USERAPP;
-    sAntSetupData.AntChannelType      = CHANNEL_TYPE_SLAVE;
-    sAntSetupData.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
-    sAntSetupData.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
-
-    sAntSetupData.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
-    sAntSetupData.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
-    sAntSetupData.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
-    sAntSetupData.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
-    sAntSetupData.AntFrequency        = ANT_FREQUENCY_USERAPP;
-    sAntSetupData.AntTxPower          = ANT_TX_POWER_USERAPP;
-
-    sAntSetupData.AntNetwork = ANT_NETWORK_DEFAULT;
-    for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
-    {
-      sAntSetupData.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
-    }
-    
-  } 
-  else
-  {
-    /* Configure ANT for this application */
-    sAntSetupData.AntChannel          = ANT_CHANNEL_USERAPP;
-    sAntSetupData.AntChannelType      = CHANNEL_TYPE_MASTER;
-    sAntSetupData.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
-    sAntSetupData.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
-
-    sAntSetupData.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
-    sAntSetupData.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
-    sAntSetupData.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
-    sAntSetupData.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
-    sAntSetupData.AntFrequency        = ANT_FREQUENCY_USERAPP;
-    sAntSetupData.AntTxPower          = ANT_TX_POWER_USERAPP;
-
-    sAntSetupData.AntNetwork = ANT_NETWORK_DEFAULT;
-    for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
-    {
-      sAntSetupData.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
-    }
+    sAntSetupData.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
   }
+
   /* If good initialization, set state to Idle */
   if( AntAssignChannel(&sAntSetupData) )
   {
@@ -162,10 +136,10 @@ void UserApp1Initialize(void)
   else
   {
     /* The task isn't properly initialized, so shut it down and don't run */
-
     LedBlink(RED, LED_4HZ);
     UserApp1_StateMachine = UserApp1SM_Error;
   }
+
 
 } /* end UserApp1Initialize() */
 
@@ -201,7 +175,31 @@ State Machine Function Definitions
 **********************************************************************************************************************/
 static void UserApp1SM_Hider(void)
 {
+  static u8 au8HiderMessage[]={0,0,0,0,0,0,0,0};
+  static bool bHiderFound=FALSE;
   
+  LCDCommand(LCD_CLEAR_CMD);
+  LCDMessage(LINE1_START_ADDR,"HIDE!");
+  
+  if(!bHiderFound)
+  {
+    if(AntReadAppMessageBuffer())
+    {
+      if(G_eAntApiCurrentMessageClass == ANT_TICK)
+      {
+        AntQueueBroadcastMessage(ANT_CHANNEL_0,au8HiderMessage);
+      }
+
+      if(G_eAntApiCurrentMessageClass == ANT_DATA)
+      {
+        bHiderFound=TRUE;
+        LCDCommand(LCD_CLEAR_CMD);
+        LCDMessage(LINE1_START_ADDR,"Found You");
+        
+        UserApp1_StateMachine=UserApp1SM_Idle;
+      }
+    }
+  }
 }
 static void UserApp1SM_Seeker(void)
 {
@@ -212,7 +210,21 @@ static void UserApp1SM_Seeker(void)
 /* Wait for the ANT channel assignment to finish */
 static void UserApp1SM_WaitChannelAssign(void)
 {
-
+  /* Check if the channel assignment is complete */
+  if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_CONFIGURED)
+  {
+    LedOff(RED);
+    LedOn(YELLOW);
+    
+    UserApp1_StateMachine = UserApp1SM_Idle;
+  }
+  
+  /* Monitor for timeout */
+  if( IsTimeUp(&UserApp1_u32Timeout, 5000) )
+  {
+    DebugPrintf("\n\r***Channel assignment timeout***\n\n\r");
+    UserApp1_StateMachine = UserApp1SM_Error;
+  }
       
 } /* end UserApp1SM_WaitChannelAssign() */
 
@@ -221,22 +233,35 @@ static void UserApp1SM_WaitChannelAssign(void)
 /* Wait for a message to be queued */
 static void UserApp1SM_Idle(void)
 {
+  static bool bHider=FALSE;
+  static bool bSeeker=FALSE;
+  
   /* Look for BUTTON 0 to open channel */
   if(WasButtonPressed(BUTTON0))
   {
     /* Got the button, so complete one-time actions before next state */
     ButtonAcknowledge(BUTTON0);
     
-    /* Queue open channel and change LED0 from yellow to blinking green to indicate channel is opening */
-    AntOpenChannelNumber(ANT_CHANNEL_USERAPP);
-
-
-    LedOff(YELLOW);
-    LedBlink(GREEN, LED_2HZ);
-    
-    /* Set timer and advance states */
-    UserApp1_u32Timeout = G_u32SystemTime1ms;
-    UserApp1_StateMachine = UserApp1SM_WaitChannelOpen;
+    sAntSetupData.AntChannelType = CHANNEL_TYPE_MASTER;
+    AntAssignChannel(&sAntSetupData);
+    bHider=TRUE;
+  }
+  else if(AntReadAppMessageBuffer())
+  {
+    if(G_eAntApiCurrentMessageClass == ANT_DATA)
+    {
+      bSeeker=TRUE;
+    }
+  }
+  
+  if(bHider)
+  {
+    UserApp1_StateMachine = UserApp1SM_Hider;
+  }
+  
+  if(bSeeker)
+  {
+    UserApp1_StateMachine = UserApp1SM_Seeker;
   }
     
 } /* end UserApp1SM_Idle() */
