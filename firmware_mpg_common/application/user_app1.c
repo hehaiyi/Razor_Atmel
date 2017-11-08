@@ -203,7 +203,37 @@ static void UserApp1SM_Hider(void)
 }
 static void UserApp1SM_Seeker(void)
 {
-
+  static u8 au8SeekerMessage[]={0,0,0,0,0,0,0,0};
+  static u8 u8CountDown[]={10};
+  static s8 sSeekerRssi=0;
+  static bool bCountEnd=FALSE;
+  static bool bBeginRecieveMessageFromHider=FALSE;
+  
+  if(u8CountDown[0]>=0&&!bCountEnd)
+  {
+    u8CountDown[0]--;
+    LCDMessage(LINE1_START_ADDR,"CountDown:");
+    LCDMessage(LINE1_START_ADDR+12,u8CountDown);
+  }
+  
+  if(u8CountDown[0]==0)
+  {
+    bCountEnd=TRUE;
+    bBeginRecieveMessageFromHider=TRUE;
+    LCDCommand(LCD_CLEAR_CMD);
+    LCDMessage(LINE1_START_ADDR,"Here I come!");
+  }
+  
+  if(bBeginRecieveMessageFromHider)
+  { 
+    if(AntReadAppMessageBuffer())
+    {
+      if(G_eAntApiCurrentMessageClass == ANT_DATA)
+      {
+        sSeekerRssi= G_sAntApiCurrentMessageExtData.s8RSSI;
+      }
+    }
+  }
 }
 
 /*-------------------------------------------------------------------------------------------------------------------*/
