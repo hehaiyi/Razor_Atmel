@@ -69,7 +69,8 @@ static u32 UserApp1_u32TickMsgCount = 0;             /* Counts the number of ANT
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
 
-
+static AntAssignChannelInfoType UserApp1_sMasterChannel;
+static AntAssignChannelInfoType UserApp1_sSlaveChannel;
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -104,21 +105,46 @@ void UserApp1Initialize(void)
   LCDCommand(LCD_CLEAR_CMD);
   LCDMessage(LINE1_START_ADDR, au8Title); 
   LCDMessage(LINE2_START_ADDR, au8Instructions);
+  
+  LedOff(RED);
+  LedOff(ORANGE);
+  LedOff(YELLOW);
+  LedOff(GREEN);
+  LedOff(CYAN);
+  LedOff(BLUE);
+  LedOff(PURPLE);
+  LedOff(WHITE);
+  LedOn(LCD_GREEN);
+  LedOff(LCD_BLUE);
+  LedOff(LCD_RED);
 
-  /* Configure ANT for this application */
-  sAntSetupData.AntChannel          = ANT_CHANNEL_USERAPP;
-  sAntSetupData.AntChannelType      = CHANNEL_TYPE_SLAVE;
-  sAntSetupData.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
-  sAntSetupData.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
+  /* Configure Slave ANT for this application */
+  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_0;
+  UserApp1_sSlaveChannel.AntChannelType      = CHANNEL_TYPE_SLAVE;
+  UserApp1_sSlaveChannel.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
+  UserApp1_sSlaveChannel.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
 
-  sAntSetupData.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
-  sAntSetupData.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
-  sAntSetupData.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
-  sAntSetupData.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
-  sAntSetupData.AntFrequency        = ANT_FREQUENCY_USERAPP;
-  sAntSetupData.AntTxPower          = ANT_TX_POWER_USERAPP;
+  UserApp1_sSlaveChannel.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
+  UserApp1_sSlaveChannel.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
+  UserApp1_sSlaveChannel.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
+  UserApp1_sSlaveChannel.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
+  UserApp1_sSlaveChannel.AntFrequency        = ANT_FREQUENCY_USERAPP;
+  UserApp1_sSlaveChannel.AntTxPower          = ANT_TX_POWER_USERAPP;
+  UserApp1_sSlaveChannel.AntNetwork = ANT_NETWORK_DEFAULT;
+  
+    /* Configure Master ANT for this application */
+  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_1;
+  UserApp1_sSlaveChannel.AntChannelType      = CHANNEL_TYPE_SLAVE;
+  UserApp1_sSlaveChannel.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
+  UserApp1_sSlaveChannel.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
 
-  sAntSetupData.AntNetwork = ANT_NETWORK_DEFAULT;
+  UserApp1_sSlaveChannel.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
+  UserApp1_sSlaveChannel.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
+  UserApp1_sSlaveChannel.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
+  UserApp1_sSlaveChannel.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
+  UserApp1_sSlaveChannel.AntFrequency        = ANT_FREQUENCY_USERAPP;
+  UserApp1_sSlaveChannel.AntTxPower          = ANT_TX_POWER_USERAPP;
+  UserApp1_sSlaveChannel.AntNetwork = ANT_NETWORK_DEFAULT;
   for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
   {
     sAntSetupData.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
