@@ -119,7 +119,7 @@ void UserApp1Initialize(void)
   LedOff(LCD_RED);
 
   /* Configure Slave ANT for this application */
-  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_0;
+  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_1;
   UserApp1_sSlaveChannel.AntChannelType      = CHANNEL_TYPE_SLAVE;
   UserApp1_sSlaveChannel.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
   UserApp1_sSlaveChannel.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
@@ -133,8 +133,8 @@ void UserApp1Initialize(void)
   UserApp1_sSlaveChannel.AntNetwork = ANT_NETWORK_DEFAULT;
   
     /* Configure Master ANT for this application */
-  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_1;
-  UserApp1_sSlaveChannel.AntChannelType      = CHANNEL_TYPE_SLAVE;
+  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_0;
+  UserApp1_sSlaveChannel.AntChannelType      = CHANNEL_TYPE_Master;
   UserApp1_sSlaveChannel.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
   UserApp1_sSlaveChannel.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
 
@@ -145,24 +145,22 @@ void UserApp1Initialize(void)
   UserApp1_sSlaveChannel.AntFrequency        = ANT_FREQUENCY_USERAPP;
   UserApp1_sSlaveChannel.AntTxPower          = ANT_TX_POWER_USERAPP;
   UserApp1_sSlaveChannel.AntNetwork = ANT_NETWORK_DEFAULT;
+  
   for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
   {
     sAntSetupData.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
   }
 
+  AntAssignChannel(&UserApp1_sMasterChannel);
+  UserApp1_u32Timeout = G_u32SystemTime1ms;
   /* If good initialization, set state to Idle */
-  if( AntAssignChannel(&sAntSetupData) )
+  if( 1 )
   {
-    /* Channel assignment is queued so start timer */
-    UserApp1_u32Timeout = G_u32SystemTime1ms;
-    LedOn(RED);
-
-    UserApp1_StateMachine = UserApp1SM_WaitChannelAssign;
+    UserApp1_StateMachine = UserApp1SM_AntConfigureMaster;
   }
   else
   {
     /* The task isn't properly initialized, so shut it down and don't run */
-    LedBlink(RED, LED_4HZ);
     UserApp1_StateMachine = UserApp1SM_Error;
   }
 
