@@ -29,6 +29,9 @@ Type Definitions
 Constants / Definitions
 **********************************************************************************************************************/
 /* Required constants for ANT channel configuration */
+#define INDEX_MASTER_DBM           (u8)2                    
+#define INDEX_SLAVE_DBM            (u8)13 
+
 #define ANT_CHANNEL_USERAPP             ANT_CHANNEL_0         /* Channel 0 - 7 */
 #define ANT_CHANNEL_TYPE_USERAPP        CHANNEL_TYPE_SLAVE    /* ANT SLAVE */
 #define ANT_DEVICEID_LO_USERAPP         (u8)0                 /* Low byte of two-byte Device # */
@@ -45,6 +48,16 @@ Constants / Definitions
 /* G_u32UserAppFlags */
 #define _CHANNEL_SYNCED                 0x00000001            /* Set when channel is synced */
 
+#define DBM_LEVEL1          (s8)-99
+#define DBM_LEVEL2          (s8)-84
+#define DBM_LEVEL3          (s8)-76
+#define DBM_LEVEL4          (s8)-69
+#define DBM_LEVEL5          (s8)-63
+#define DBM_LEVEL6          (s8)-58
+#define DBM_LEVEL7          (s8)-54
+#define DBM_LEVEL8          (s8)-51
+#define DBM_MAX_LEVEL       DBM_LEVEL8
+#define NUM_DBM_LEVELS      (u8)8
 
 /**********************************************************************************************************************
 Function Declarations
@@ -75,6 +88,9 @@ static void UserApp1SM_Idle(void);
 static void UserApp1SM_WaitChannelOpen(void);
 static void UserApp1SM_ChannelOpen(void);
 static void UserApp1SM_WaitChannelClose(void);
+
+static void UserApp1SM_AntConfigureMaster(void);
+static void UserApp1SM_AntConfigureSlave(void);
 
 static void UserApp1SM_Error(void);         
 static void UserApp1SM_FailedInit(void);        
