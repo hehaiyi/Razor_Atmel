@@ -128,7 +128,7 @@ void UserApp1Initialize(void)
   LedOff(LCD_RED);
 
   /* Configure Slave ANT for this application */
-  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_1;
+  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_0;
   UserApp1_sSlaveChannel.AntChannelType      = CHANNEL_TYPE_SLAVE;
   UserApp1_sSlaveChannel.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
   UserApp1_sSlaveChannel.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
@@ -160,12 +160,10 @@ void UserApp1Initialize(void)
     sAntSetupData.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
   }
 
-  AntAssignChannel(&UserApp1_sMasterChannel);
-  UserApp1_u32Timeout = G_u32SystemTime1ms;
   /* If good initialization, set state to Idle */
   if( 1 )
   {
-    UserApp1_StateMachine = UserApp1SM_AntConfigureMaster;
+    UserApp1_StateMachine = UserApp1SM_Idle;
   }
   else
   {
@@ -360,11 +358,9 @@ static void UserApp1SM_AntConfigureMaster(void)
   if(AntRadioStatusChannel(ANT_CHANNEL_0) == ANT_CONFIGURED)
   {
     DebugPrintf("Master channel configured\n\n\r");
-    
-    /* Queue configuration of Slave channel */
-    AntAssignChannel(&UserApp1_sSlaveChannel);
-    UserApp1_u32Timeout = G_u32SystemTime1ms;
-    UserApp1_StateMachine = UserApp1SM_AntConfigureSlave;
+    AntOpenChannelNumber(ANT_CHANNEL_0);
+    AntQueueBroadcastMessage(ANT_CHANNEL_0, UserApp1_au8Data);
+    UserApp1_StateMachine = UserApp1SM_Idle;
   }
   
   /* Check for timeout */
@@ -379,14 +375,11 @@ static void UserApp1SM_AntConfigureMaster(void)
 static void UserApp1SM_AntConfigureSlave(void)
 {
     /* Wait for the ANT slave channel to be configured */
-  if(AntRadioStatusChannel(ANT_CHANNEL_1) == ANT_CONFIGURED)
+  if(AntRadioStatusChannel(ANT_CHANNEL_0) == ANT_CONFIGURED)
   {
     DebugPrintf("Slave channel configured\n\n\r");
-    
-    /* Update the broadcast message data to send the user's name the go to Idle */
-    AntQueueBroadcastMessage(ANT_CHANNEL_0, UserApp1_au8Data);
+    AntOpenChannelNumber(ANT_CHANNEL_1);
     AntQueueBroadcastMessage(ANT_CHANNEL_1, UserApp1_au8Data);
-
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   
@@ -436,7 +429,7 @@ static void UserApp1SM_Seeker(void)
   static bool bCountEnd=FALSE;
   static bool bBeginRecieveMessageFromHider=FALSE;
   
-  if(u8CountDown[0]>=0&&!bCountEnd)
+  if(u8CountDown[0]>=1&&!bCountEnd)
   {
     u8CountDown[0]--;
     LCDMessage(LINE1_START_ADDR,"CountDown:");
@@ -469,28 +462,40 @@ static void UserApp1SM_Seeker(void)
 /* Wait for a message to be queued */
 static void UserApp1SM_Idle(void)
 {
-
-  
+  static bool bChooseTheHider=FALSE; 
+  static bool bChooseTheSeeker=FALSE;
   /* Look for BUTTON 0 to open channel */
-  if(WasButtonPressed(BUTTON0))
+  if(WasButtonPressed(BUTTON0)&&bChooseTheHider==FALSE)
   {
     /* Got the button, so complete one-time actions before next state */
     ButtonAcknowledge(BUTTON0);
     
-    AntOpenChannelNumber(ANT_CHANNEL_0);
-    AntOpenChannelNumber(ANT_CHANNEL_1);
-    
+    AntAssignChannel(&UserApp1_sMasterChannel);
+    UserApp1_u32Timeout = G_u32SystemTime1ms;
+    //AntOpenChannelNumber(ANT_CHANNEL_0);
+    //AntOpenChannelNumber(ANT_CHANNEL_1);
+    bChooseTheHider=TRUE;
+    bChooseTheSeeker=TRUE;
     bHider=TRUE;
-  }
-
-  if(bHider)
-  {
-    UserApp1_StateMachine = UserApp1SM_Hider;
+    
+    UserApp1_StateMachine = UserApp1SM_AntConfigureMaster;
   }
   
+  if(bChooseTheSeeker==TRUE)
+  {
+    AntAssignChannel(&UserApp1_sSlaveChannel);
+    bChooseTheSeeker=FALSE;
+    UserApp1_StateMachine = UserApp1SM_AntConfigureSlave;
+  }
+
   if(bSeeker)
   {
     UserApp1_StateMachine = UserApp1SM_Seeker;
+  }
+  
+  if(bHider)
+  {
+    UserApp1_StateMachine = UserApp1SM_Hider;
   }
     
 } /* end UserApp1SM_Idle() */
