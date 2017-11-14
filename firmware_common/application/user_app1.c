@@ -87,7 +87,11 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
- 
+  AT91C_BASE_PIOB->PIO_OER=PB_03_BLADE_AN0;
+  AT91C_BASE_PIOA->PIO_OER=PA_11_BLADE_UPIMO;
+  AT91C_BASE_PIOB->PIO_PER=PB_03_BLADE_AN0;
+  AT91C_BASE_PIOA->PIO_PER=PA_11_BLADE_UPIMO;
+
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -136,7 +140,41 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+  static u8 u8Count=0;
+  static bool bblink=FALSE;
+  u8Count++;
+  
+  if(AT91C_BASE_PIOA->PIO_PDSR & PA_15_BLADE_SCK)  
+  {
+    AT91C_BASE_PIOB->PIO_CODR=PB_14_LED_PRP;
+    AT91C_BASE_PIOB->PIO_SODR=PB_03_BLADE_AN0;
+    AT91C_BASE_PIOA->PIO_CODR=PA_11_BLADE_UPIMO;
+    bblink=FALSE;
+  }
+  else
+  {
+    AT91C_BASE_PIOB->PIO_SODR=PB_14_LED_PRP;
+    bblink=TRUE;
 
+  }
+  
+    if(u8Count==100&&bblink)
+    {
+      AT91C_BASE_PIOB->PIO_CODR=PB_03_BLADE_AN0;
+      AT91C_BASE_PIOA->PIO_SODR=PA_11_BLADE_UPIMO;
+    }
+    
+    if(u8Count==200&bblink)
+    {
+      AT91C_BASE_PIOB->PIO_SODR=PB_03_BLADE_AN0;
+      AT91C_BASE_PIOA->PIO_CODR=PA_11_BLADE_UPIMO;
+      u8Count=0;
+    }
+  
+    if(u8Count==200)
+    {
+      u8Count=0;
+    }
 } /* end UserApp1SM_Idle() */
     
 
