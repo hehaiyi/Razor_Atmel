@@ -464,27 +464,33 @@ static void UserApp1SM_Idle(void)
 {
   static bool bChooseTheHider=FALSE; 
   static bool bChooseTheSeeker=FALSE;
+  static u16 u16Count=0;
+  
+  u16Count++;
   /* Look for BUTTON 0 to open channel */
-  if(WasButtonPressed(BUTTON0)&&bChooseTheHider==FALSE)
+  if(WasButtonPressed(BUTTON0))
   {
     /* Got the button, so complete one-time actions before next state */
     ButtonAcknowledge(BUTTON0);
     
-    AntAssignChannel(&UserApp1_sMasterChannel);
-    UserApp1_u32Timeout = G_u32SystemTime1ms;
-    //AntOpenChannelNumber(ANT_CHANNEL_0);
-    //AntOpenChannelNumber(ANT_CHANNEL_1);
-    bChooseTheHider=TRUE;
-    bChooseTheSeeker=TRUE;
-    bHider=TRUE;
-    
-    UserApp1_StateMachine = UserApp1SM_AntConfigureMaster;
+    if(bChooseTheHider==FALSE)
+    {
+      AntUnassignChannelNumber(ANT_CHANNEL_0);
+      AntAssignChannel(&UserApp1_sMasterChannel);
+      UserApp1_u32Timeout = G_u32SystemTime1ms;
+      //AntOpenChannelNumber(ANT_CHANNEL_0);
+      //AntOpenChannelNumber(ANT_CHANNEL_1);
+      bChooseTheHider=TRUE;
+      bHider=TRUE;
+      UserApp1_StateMachine = UserApp1SM_AntConfigureMaster;
+    }   
   }
   
-  if(bChooseTheSeeker==TRUE)
+  if(bChooseTheSeeker==FALSE)
   {
+    bChooseTheSeeker=TRUE;
+    bSeeker=TRUE;
     AntAssignChannel(&UserApp1_sSlaveChannel);
-    bChooseTheSeeker=FALSE;
     UserApp1_StateMachine = UserApp1SM_AntConfigureSlave;
   }
 
