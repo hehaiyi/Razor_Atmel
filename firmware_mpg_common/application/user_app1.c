@@ -79,7 +79,7 @@ void AntGetdBmAscii(s8 s8RssiValue_, u8* pu8Result_);
 static u8 UserApp1_au8Data[9]="0\0\0\0\0\0\0\0";
 static bool bHider=FALSE;
 static bool bSeeker=FALSE;
-static u8 UserApp1_au8LcdInformationMessage[] = "M:-xx dBm";
+static u8 UserApp1_au8LcdInformationMessage[] = "M:-xx dBm S:-xx dbm";
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -397,16 +397,6 @@ static void UserApp1SM_Hider(void)
 {
   static u8 au8HiderMessage[]={0,0,0,0,0,0,0,0};
   static bool bHiderFound=FALSE;
-  LedNumberType aeLedDisplayLevels[] = {RED, ORANGE, YELLOW, GREEN, CYAN, BLUE, PURPLE, WHITE};
-  s8 as8dBmLevels[] = {DBM_LEVEL1, DBM_LEVEL2, DBM_LEVEL3, DBM_LEVEL4, 
-                       DBM_LEVEL5, DBM_LEVEL6, DBM_LEVEL7, DBM_LEVEL8};
-  u8 u8EventCode;
-  u8 au8UserName[9];
-    
-  static u8 u32MasterMessageCounter = 0;
-  static s8 s8RssiChannel0 = -99;
-  static s8 s8RssiChannel1 = -99;
-  static s8 s8StrongestRssi = -99;
   
   LCDCommand(LCD_CLEAR_CMD);
   LCDMessage(LINE1_START_ADDR,"HIDE!");
@@ -425,66 +415,11 @@ static void UserApp1SM_Hider(void)
         bHiderFound=TRUE;
         LCDCommand(LCD_CLEAR_CMD);
         LCDMessage(LINE1_START_ADDR,"Found You");
-        
-        UserApp1_StateMachine=UserApp1SM_Idle;
       }
-    }
-    
-    /* Check the message class to determine how to process the message */
-    if(G_eAntApiCurrentMessageClass == ANT_TICK)
-    {
-      /* Get the EVENT code from the ANT_TICK message */ 
-      u8EventCode = G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX];
-      
-      /* Slave devices get different event codes than masters, so handle seperately */
-      if(G_sAntApiCurrentMessageExtData.u8Channel == 0)
-      {
-        switch (u8EventCode)
-        {
-          case EVENT_TX:
-          {
-            /* Keep track of message and update LCD if too many messages have been sent
-            without any being received.  The counter is cleared whenever the Master channel
-            receives a message from the Slave it is trying to talk to. */
-            u32MasterMessageCounter++;
-            if(u32MasterMessageCounter >= 8)
-            {
-              s8RssiChannel0 = DBM_LEVEL1;
-              LedOff(LCD_RED);
-              UserApp1_au8LcdInformationMessage[INDEX_MASTER_DBM + 1] = 'x';
-              UserApp1_au8LcdInformationMessage[INDEX_MASTER_DBM + 2] = 'x';
-            }
-            break;
-          }
-          default:
-          {
-            DebugPrintf("Master unhandled event\n\n\r");
-            break;
-          }
-        } /* end switch u8EventCode */
-      }
-            if(G_sAntApiCurrentMessageExtData.u8Channel == 1)
-      {
-        /* Check the Event code and respond */
-        switch (u8EventCode)
-        {
-          case EVENT_RX_FAIL_GO_TO_SEARCH:
-          {
-            s8RssiChannel1 = DBM_LEVEL1;
-            UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM + 1] = 'x';
-            UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM + 2] = 'x';
-            break;
-          }
-          
-          default:
-          {
-            DebugPrintf("Slave unhandled event\n\n\r");
-            break;
-          }
-        } /* end switch u8EventCode */
-      } /* end if(G_sAntApiCurrentMessageExtData.u8Channel == 1) */
-    } /* end if(G_eAntApiCurrentMessageClass == ANT_TICK) */    
+    }    
   }
+  
+  UserApp1_StateMachine=UserApp1SM_Idle;
 }
 static void UserApp1SM_Seeker(void)
 {
@@ -493,6 +428,13 @@ static void UserApp1SM_Seeker(void)
   static s8 sSeekerRssi=0;
   static bool bCountEnd=FALSE;
   static bool bBeginRecieveMessageFromHider=FALSE;
+  LedNumberType aeLedDisplayLevels[] = {RED, ORANGE, YELLOW, GREEN, CYAN, BLUE, PURPLE, WHITE};
+  s8 as8dBmLevels[] = {DBM_LEVEL1, DBM_LEVEL2, DBM_LEVEL3, DBM_LEVEL4, 
+                       DBM_LEVEL5, DBM_LEVEL6, DBM_LEVEL7, DBM_LEVEL8};
+  u8 u8EventCode;
+  u8 au8UserName[9];
+    
+  static s8 s8RssiChannel0 = -99;
   
   if(u8CountDown[0]>=1&&!bCountEnd)
   {
@@ -507,6 +449,30 @@ static void UserApp1SM_Seeker(void)
     bBeginRecieveMessageFromHider=TRUE;
     LCDCommand(LCD_CLEAR_CMD);
     LCDMessage(LINE1_START_ADDR,"Here I come!");
+    
+        /* Check the message class to determine how to process the message */
+    if(G_eAntApiCurrentMessageClass == ANT_TICK)
+    {      
+      if(G_sAntApiCurrentMessageExtData.u8Channel == 0)
+      {
+        /* Check the Event code and respond */
+        switch (u8EventCode)
+        {
+          case EVENT_RX_FAIL_GO_TO_SEARCH:
+          {
+            UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM + 1] = 'x';
+            UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM + 2] = 'x';
+            break;
+          }
+          
+          default:
+          {
+            DebugPrintf("Slave unhandled event\n\n\r");
+            break;
+          }
+        } /* end switch u8EventCode */
+      } 
+    } /* end if(G_eAntApiCurrentMessageClass == ANT_TICK) */   
   }
   
   if(bBeginRecieveMessageFromHider)
@@ -516,9 +482,22 @@ static void UserApp1SM_Seeker(void)
       if(G_eAntApiCurrentMessageClass == ANT_DATA)
       {
         sSeekerRssi= G_sAntApiCurrentMessageExtData.s8RSSI;
+      
+        /* Loop through all of the levels to check which LEDs to turn on */
+        for(u8 i = 0; i < NUM_DBM_LEVELS; i++)
+        {
+          if(s8StrongestRssi > as8dBmLevels[i])
+          {
+            LedOn(aeLedDisplayLevels[i]);
+          }
+          else
+          {
+            LedOff(aeLedDisplayLevels[i]);
+          }
+        }
       }
     }
-  }
+  }  
 }
 
 
