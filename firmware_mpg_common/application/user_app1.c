@@ -77,9 +77,9 @@ static void UserApp1SM_AntConfigureSlave();
 void AntGetdBmAscii(s8 s8RssiValue_, u8* pu8Result_);
 
 static u8 UserApp1_au8Data[9]="0\0\0\0\0\0\0\0";
-static bool bHider=FALSE;
-static bool bSeeker=FALSE;
+static bool bHiderAndSeeker=FALSE;
 static u8 UserApp1_au8LcdInformationMessage[] = "M:-xx dBm S:-xx dbm";
+static bool bFound=FALSE;
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -197,7 +197,6 @@ void UserApp1RunActiveState(void)
   s8 as8dBmLevels[] = {DBM_LEVEL1, DBM_LEVEL2, DBM_LEVEL3, DBM_LEVEL4, 
                        DBM_LEVEL5, DBM_LEVEL6, DBM_LEVEL7, DBM_LEVEL8};
   u8 u8EventCode;
-  u8 au8UserName[9];
     
   static u8 u32MasterMessageCounter = 0;
   static s8 s8RssiChannel0 = -99;
@@ -297,26 +296,7 @@ void UserApp1RunActiveState(void)
         s8RssiChannel1 = G_sAntApiCurrentMessageExtData.s8RSSI;
         AntGetdBmAscii(s8RssiChannel1, &UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM]);
       }
-                             
-      /* Read and display user name if level is high enough */
-      if(s8StrongestRssi > DBM_MAX_LEVEL)
-      {
-        /* Assume that the format of the name in the DATA message is letters with trailing
-        spaces so we always read 8 characters and don't need to worry about checking. */
-        for(u8 i = 0; i < ANT_DATA_BYTES; i++)
-        {
-          au8UserName[i] = G_au8AntApiCurrentMessageBytes[i];
-        }
-
-        /* Add the NULL and write the name to the LCD */
-        au8UserName[8] = '\0';
-        //LCDMessage(ADDRESS_LCD_SLAVE_NAME, au8UserName);
-      }
-      else
-      {
-        /* Otherwise clear the name area */
-        //LCDClearChars(ADDRESS_LCD_SLAVE_NAME, 8);
-      }
+                            
       
     } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
 
@@ -342,6 +322,11 @@ void UserApp1RunActiveState(void)
       {
         LedOff(aeLedDisplayLevels[i]);
       }
+    }
+    
+    if(s8StrongestRssi==DBM_LEVEL1)
+    {
+      bFound=TRUE;
     }
   }
 } /* end UserApp1RunActiveState */
@@ -399,8 +384,8 @@ static void UserApp1SM_AntConfigureSlave(void)
   }
 }
 
-
-static void UserApp1SM_Hider(void)
+/*
+static void UserApp1SM_HiderAndSeeker(void)
 {
   static u8 au8HiderMessage[]={0,0,0,0,0,0,0,0};
   static bool bHiderFound=FALSE;
@@ -410,40 +395,31 @@ static void UserApp1SM_Hider(void)
   
   if(!bHiderFound)
   {
-    if(AntReadAppMessageBuffer())
-    {
-      if(G_eAntApiCurrentMessageClass == ANT_TICK)
-      {
-        AntQueueBroadcastMessage(ANT_CHANNEL_0,au8HiderMessage);
-      }
+    UserApp1RunActiveState();
+    AntQueueBroadcastMessage(ANT_CHANNEL_0,au8HiderMessage);
 
-      if(G_eAntApiCurrentMessageClass == ANT_DATA)
-      {
-        bHiderFound=TRUE;
-        LCDCommand(LCD_CLEAR_CMD);
-        LCDMessage(LINE1_START_ADDR,"Found You");
-      }
-    }    
+    if(bFound==TRUE)
+    {
+       bHiderFound=TRUE;
+       LCDCommand(LCD_CLEAR_CMD);
+       LCDMessage(LINE1_START_ADDR,"I was Found");
+    }
   }
   
   UserApp1_StateMachine=UserApp1SM_Idle;
 }
-static void UserApp1SM_Seeker(void)
+*/
+
+static void UserApp1SM_HiderAndSeeker(void)
 {
-  static u8 au8SeekerMessage[]={0,0,0,0,0,0,0,0};
+  static u8 au8SeekerMessage[]={1,1,1,1,1,1,1,1};
   static u8 u8CountDown[]={10};
   static s8 sSeekerRssi=0;
   static bool bCountEnd=FALSE;
-  static bool bBeginRecieveMessageFromHider=FALSE;
-  LedNumberType aeLedDisplayLevels[] = {RED, ORANGE, YELLOW, GREEN, CYAN, BLUE, PURPLE, WHITE};
-  s8 as8dBmLevels[] = {DBM_LEVEL1, DBM_LEVEL2, DBM_LEVEL3, DBM_LEVEL4, 
-                       DBM_LEVEL5, DBM_LEVEL6, DBM_LEVEL7, DBM_LEVEL8};
-  u8 u8EventCode;
-  u8 au8UserName[9];
-    
-  static s8 s8RssiChannel0 = -99;
+  static bool bBeginRecieveMessageFromHider;
   
-  if(u8CountDown[0]>=0&&!bCountEnd)
+  /*the game don't begin untill Countdown end*/
+  if(u8CountDown[0]>=1&&!bCountEnd)
   {
     u8CountDown[0]--;
     LCDMessage(LINE1_START_ADDR,"CountDown:");
@@ -455,56 +431,23 @@ static void UserApp1SM_Seeker(void)
     bCountEnd=TRUE;
     bBeginRecieveMessageFromHider=TRUE;
     LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE1_START_ADDR,"Here I come!");
+    LCDMessage(LINE2_START_ADDR,"Hider:Coming!");
+    LCDMessage(LINE2_START_ADDR,"Seeker:Here I come!");
+     
+    if(bBeginRecieveMessageFromHider)
+    { 
+      UserApp1RunActiveState();
+    }  
     
-        /* Check the message class to determine how to process the message */
-    if(G_eAntApiCurrentMessageClass == ANT_TICK)
-    {      
-      if(G_sAntApiCurrentMessageExtData.u8Channel == 0)
-      {
-        /* Check the Event code and respond */
-        switch (u8EventCode)
-        {
-          case EVENT_RX_FAIL_GO_TO_SEARCH:
-          {
-            UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM + 1] = 'x';
-            UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM + 2] = 'x';
-            break;
-          }
-          
-          default:
-          {
-            DebugPrintf("Slave unhandled event\n\n\r");
-            break;
-          }
-        } /* end switch u8EventCode */
-      } 
-    } /* end if(G_eAntApiCurrentMessageClass == ANT_TICK) */   
+    if(bFound==TRUE)
+    {
+      LCDCommand(LCD_CLEAR_CMD);
+      LCDMessage(LINE1_START_ADDR,"Seeker:Found you!");
+      LCDMessage(LINE2_START_ADDR,"Hider:You found me!");
+    }
   }
   
-  if(bBeginRecieveMessageFromHider)
-  { 
-    if(AntReadAppMessageBuffer())
-    {
-      if(G_eAntApiCurrentMessageClass == ANT_DATA)
-      {
-        sSeekerRssi= G_sAntApiCurrentMessageExtData.s8RSSI;
-      
-        /* Loop through all of the levels to check which LEDs to turn on */
-        for(u8 i = 0; i < NUM_DBM_LEVELS; i++)
-        {
-          if(s8StrongestRssi > as8dBmLevels[i])
-          {
-            LedOn(aeLedDisplayLevels[i]);
-          }
-          else
-          {
-            LedOff(aeLedDisplayLevels[i]);
-          }
-        }
-      }
-    }
-  }  
+  UserApp1_StateMachine = UserApp1SM_Idle;
 }
 
 
@@ -513,23 +456,18 @@ static void UserApp1SM_Seeker(void)
 /* Wait for a message to be queued */
 static void UserApp1SM_Idle(void)
 {
-<<<<<<< HEAD
   static bool bChooseTheHider=FALSE; 
   static bool bChooseTheSeeker=FALSE;
   static u16 u16Count=0;
   
   u16Count++;
-=======
 
-  
->>>>>>> parent of 8858986... 11.13 afternoon
   /* Look for BUTTON 0 to open channel */
   if(WasButtonPressed(BUTTON0))
   {
     /* Got the button, so complete one-time actions before next state */
     ButtonAcknowledge(BUTTON0);
-    
-<<<<<<< HEAD
+
     if(bChooseTheHider==FALSE)
     {
       AntUnassignChannelNumber(ANT_CHANNEL_0);
@@ -538,7 +476,6 @@ static void UserApp1SM_Idle(void)
       //AntOpenChannelNumber(ANT_CHANNEL_0);
       //AntOpenChannelNumber(ANT_CHANNEL_1);
       bChooseTheHider=TRUE;
-      bHider=TRUE;
       UserApp1_StateMachine = UserApp1SM_AntConfigureMaster;
     }   
   }
@@ -546,26 +483,18 @@ static void UserApp1SM_Idle(void)
   if(bChooseTheSeeker==FALSE)
   {
     bChooseTheSeeker=TRUE;
-    bSeeker=TRUE;
     AntAssignChannel(&UserApp1_sSlaveChannel);
     UserApp1_StateMachine = UserApp1SM_AntConfigureSlave;
-=======
     AntOpenChannelNumber(ANT_CHANNEL_0);
     AntOpenChannelNumber(ANT_CHANNEL_1);
-    
-    bHider=TRUE;
->>>>>>> parent of 8858986... 11.13 afternoon
+
   }
 
-  if(bHider)
+  if(bHiderAndSeeker)
   {
-    UserApp1_StateMachine = UserApp1SM_Hider;
+    UserApp1_StateMachine = UserApp1SM_HiderAndSeeker;
   }
-  
-  if(bSeeker)
-  {
-    UserApp1_StateMachine = UserApp1SM_Seeker;
-  }
+
     
 } /* end UserApp1SM_Idle() */
      
