@@ -97,7 +97,7 @@ void UserApp1Initialize(void)
   {
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
-  else
+  else  
   {
     /* The task isn't properly initialized, so shut it down and don't run */
     UserApp1_StateMachine = UserApp1SM_Error;
@@ -140,41 +140,79 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+  static u16 au16NotesLeft[]    = {F4, F4, A4, A4, D4, D4, F4, F4, A3S, A3S, D4, D4, C4, C4, E4, E4};
+  static u16 au16DurationLeft[] = {EN, EN, EN, EN, EN, EN, EN, EN, EN,  EN,  EN, EN, EN, EN, EN, EN};
   static u8 u8Count=0;
+  static u16 u16Counter=0;
+  static u16 u16NoteCount=0;
   static bool bblink=FALSE;
-  u8Count++;
   
-  if(AT91C_BASE_PIOA->PIO_PDSR & PA_15_BLADE_SCK)  
+  u8Count++;
+  u16Counter++;
+  
+  if(AT91C_BASE_PIOA->PIO_PDSR & PA_17_BUTTON0)  
   {
-    AT91C_BASE_PIOB->PIO_CODR=PB_14_LED_PRP;
-    AT91C_BASE_PIOB->PIO_SODR=PB_03_BLADE_AN0;
+    AT91C_BASE_PIOB->PIO_CODR=PB_20_LED_RED;
+    AT91C_BASE_PIOB->PIO_CODR=PB_19_LED_GRN;
+    AT91C_BASE_PIOB->PIO_CODR=PB_03_BLADE_AN0;
     AT91C_BASE_PIOA->PIO_CODR=PA_11_BLADE_UPIMO;
+    AT91C_BASE_PIOA->PIO_CODR=PA_28_BUZZER1;
     bblink=FALSE;
   }
   else
   {
-    AT91C_BASE_PIOB->PIO_SODR=PB_14_LED_PRP;
     bblink=TRUE;
-
+    AT91C_BASE_PIOA->PIO_SODR=PA_28_BUZZER1;
+  }
+  /*
+  if(AT91C_BASE_PIOA->PIO_PDSR & PA_15_BLADE_SCK)  
+  {
+    AT91C_BASE_PIOB->PIO_CODR=PB_20_LED_RED;
+    AT91C_BASE_PIOB->PIO_CODR=PB_19_LED_GRN;
+    AT91C_BASE_PIOB->PIO_CODR=PB_03_BLADE_AN0;
+    AT91C_BASE_PIOA->PIO_CODR=PA_11_BLADE_UPIMO;
+    AT91C_BASE_PIOA->PIO_CODR=PA_28_BUZZER1;
+    bblink=FALSE;
+  }
+  else
+  {
+    AT91C_BASE_PIOA->PIO_SODR=PA_28_BUZZER1;
+    bblink=TRUE;
+  }
+  */
+  if(u8Count==100&&bblink)
+  {
+    AT91C_BASE_PIOB->PIO_CODR=PB_03_BLADE_AN0;
+    AT91C_BASE_PIOA->PIO_SODR=PA_11_BLADE_UPIMO;
+    AT91C_BASE_PIOB->PIO_CODR=PB_20_LED_RED;
+    AT91C_BASE_PIOB->PIO_SODR=PB_19_LED_GRN;
   }
   
-    if(u8Count==100&&bblink)
-    {
-      AT91C_BASE_PIOB->PIO_CODR=PB_03_BLADE_AN0;
-      AT91C_BASE_PIOA->PIO_SODR=PA_11_BLADE_UPIMO;
-    }
-    
-    if(u8Count==200&bblink)
-    {
-      AT91C_BASE_PIOB->PIO_SODR=PB_03_BLADE_AN0;
-      AT91C_BASE_PIOA->PIO_CODR=PA_11_BLADE_UPIMO;
-      u8Count=0;
-    }
+  if(u8Count==200&bblink)
+  {
+    AT91C_BASE_PIOB->PIO_SODR=PB_03_BLADE_AN0;
+    AT91C_BASE_PIOA->PIO_CODR=PA_11_BLADE_UPIMO;
+    AT91C_BASE_PIOB->PIO_SODR=PB_20_LED_RED;
+    AT91C_BASE_PIOB->PIO_CODR=PB_19_LED_GRN;
+    u8Count=0;
+  }
+
+  if(u8Count==200)
+  {
+    u8Count=0;
+  }
   
-    if(u8Count==200)
-    {
-      u8Count=0;
-    }
+  if(u16Counter==au16DurationLeft[u16NoteCount])
+  {
+    u16Counter=0;
+    u16NoteCount++;
+    PWMAudioSetFrequency(BUZZER1,au16NotesLeft[u16NoteCount]);
+  }
+  
+  if(u16NoteCount==(sizeof(au16DurationLeft)/2-1))
+  {
+    u16NoteCount=0;
+  }
 } /* end UserApp1SM_Idle() */
     
 
