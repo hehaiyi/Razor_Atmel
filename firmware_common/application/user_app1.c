@@ -151,7 +151,7 @@ static void UserApp1SM_Idle(void)
   
 
   /*if press Button0*/
-  if(AT91C_BASE_PIOA->PIO_PDSR & PA_17_BUTTON0)  
+  if((AT91C_BASE_PIOA->PIO_PDSR & PA_17_BUTTON0)&&(AT91C_BASE_PIOA->PIO_PDSR & PA_15_BLADE_SCK))  
   {
     AT91C_BASE_PIOB->PIO_CODR=PB_20_LED_RED;
     AT91C_BASE_PIOB->PIO_CODR=PB_19_LED_GRN;
@@ -170,28 +170,7 @@ static void UserApp1SM_Idle(void)
     u8LedIntervalTime++;
     bBlink=TRUE;
     bBuzzer=TRUE;
-  }
-  
-  
-  /*
-  if(AT91C_BASE_PIOA->PIO_PDSR & PA_15_BLADE_SCK)  
-  {
-    AT91C_BASE_PIOB->PIO_CODR=PB_20_LED_RED;
-    AT91C_BASE_PIOB->PIO_CODR=PB_19_LED_GRN;
-    AT91C_BASE_PIOB->PIO_CODR=PB_03_BLADE_AN0;
-    AT91C_BASE_PIOA->PIO_CODR=PA_11_BLADE_UPIMO;
-    bBlink=FALSE;
-    bBuzzer=FALSE;
-    PWMAudioOff(BUZZER1);
-  }
-  else
-  {
-    u8DurationCount++;
-    u8LedIntervalTime++;
-    bBlink=TRUE;
-    bBuzzer=TRUE;
-  }
-  */
+  } 
   
   /*set time and make led blink*/
   if(u8LedIntervalTime==100&&bBlink)
