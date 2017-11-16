@@ -87,6 +87,7 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  /*pin Initialize*/
   AT91C_BASE_PIOB->PIO_OER=PB_03_BLADE_AN0;
   AT91C_BASE_PIOA->PIO_OER=PA_11_BLADE_UPIMO;
   AT91C_BASE_PIOB->PIO_PER=PB_03_BLADE_AN0;
@@ -142,28 +143,36 @@ static void UserApp1SM_Idle(void)
 {
   static u16 au16NotesLeft[]    = {F4, F4, A4, A4, D4, D4, F4, F4, A3S, A3S, D4, D4, C4, C4, E4, E4};
   static u16 au16DurationLeft[] = {EN, EN, EN, EN, EN, EN, EN, EN, EN,  EN,  EN, EN, EN, EN, EN, EN};
-  static u8 u8Count=0;
-  static u16 u16Counter=0;
-  static u16 u16NoteCount=0;
-  static bool bblink=FALSE;
+  static u8 u8LedIntervalTime=0;
+  static u8 u8DurationCount=0;
+  static u8 u8NoteCount=0;
+  static bool bBlink=FALSE;
+  static bool bBuzzer=FALSE;
   
-  u8Count++;
-  u16Counter++;
-  
+
+  /*if press Button0*/
   if(AT91C_BASE_PIOA->PIO_PDSR & PA_17_BUTTON0)  
   {
     AT91C_BASE_PIOB->PIO_CODR=PB_20_LED_RED;
     AT91C_BASE_PIOB->PIO_CODR=PB_19_LED_GRN;
     AT91C_BASE_PIOB->PIO_CODR=PB_03_BLADE_AN0;
     AT91C_BASE_PIOA->PIO_CODR=PA_11_BLADE_UPIMO;
-    AT91C_BASE_PIOA->PIO_CODR=PA_28_BUZZER1;
-    bblink=FALSE;
+    
+    bBlink=FALSE;
+    bBuzzer=FALSE;
+    
+    PWMAudioOff(BUZZER1);
   }
   else
   {
-    bblink=TRUE;
-    AT91C_BASE_PIOA->PIO_SODR=PA_28_BUZZER1;
+    /*only the button pressed work*/
+    u8DurationCount++;
+    u8LedIntervalTime++;
+    bBlink=TRUE;
+    bBuzzer=TRUE;
   }
+  
+  
   /*
   if(AT91C_BASE_PIOA->PIO_PDSR & PA_15_BLADE_SCK)  
   {
@@ -171,16 +180,21 @@ static void UserApp1SM_Idle(void)
     AT91C_BASE_PIOB->PIO_CODR=PB_19_LED_GRN;
     AT91C_BASE_PIOB->PIO_CODR=PB_03_BLADE_AN0;
     AT91C_BASE_PIOA->PIO_CODR=PA_11_BLADE_UPIMO;
-    AT91C_BASE_PIOA->PIO_CODR=PA_28_BUZZER1;
-    bblink=FALSE;
+    bBlink=FALSE;
+    bBuzzer=FALSE;
+    PWMAudioOff(BUZZER1);
   }
   else
   {
-    AT91C_BASE_PIOA->PIO_SODR=PA_28_BUZZER1;
-    bblink=TRUE;
+    u8DurationCount++;
+    u8LedIntervalTime++;
+    bBlink=TRUE;
+    bBuzzer=TRUE;
   }
   */
-  if(u8Count==100&&bblink)
+  
+  /*set time and make led blink*/
+  if(u8LedIntervalTime==100&&bBlink)
   {
     AT91C_BASE_PIOB->PIO_CODR=PB_03_BLADE_AN0;
     AT91C_BASE_PIOA->PIO_SODR=PA_11_BLADE_UPIMO;
@@ -188,30 +202,28 @@ static void UserApp1SM_Idle(void)
     AT91C_BASE_PIOB->PIO_SODR=PB_19_LED_GRN;
   }
   
-  if(u8Count==200&bblink)
+  if(u8LedIntervalTime==200&&bBlink)
   {
     AT91C_BASE_PIOB->PIO_SODR=PB_03_BLADE_AN0;
     AT91C_BASE_PIOA->PIO_CODR=PA_11_BLADE_UPIMO;
     AT91C_BASE_PIOB->PIO_SODR=PB_20_LED_RED;
     AT91C_BASE_PIOB->PIO_CODR=PB_19_LED_GRN;
-    u8Count=0;
-  }
-
-  if(u8Count==200)
-  {
-    u8Count=0;
+    u8LedIntervalTime=0;
   }
   
-  if(u16Counter==au16DurationLeft[u16NoteCount])
+  /*set Buzzer*/
+  if(u8DurationCount==au16DurationLeft[u8NoteCount]&&bBuzzer==TRUE)
   {
-    u16Counter=0;
-    u16NoteCount++;
-    PWMAudioSetFrequency(BUZZER1,au16NotesLeft[u16NoteCount]);
+    u8DurationCount=0;
+    u8NoteCount++;
+    PWMAudioSetFrequency(BUZZER1,au16NotesLeft[u8NoteCount]);
+    PWMAudioOn(BUZZER1);
   }
   
-  if(u16NoteCount==(sizeof(au16DurationLeft)/2-1))
+  /*implement music loop*/
+  if(u8NoteCount==(sizeof(au16DurationLeft)/2-1))
   {
-    u16NoteCount=0;
+    u8NoteCount=0;
   }
 } /* end UserApp1SM_Idle() */
     
