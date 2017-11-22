@@ -63,9 +63,6 @@ extern volatile u32 G_u32SystemTime1s;                 /* From board-specific so
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_" and be declared as static.
 ***********************************************************************************************************************/
-static u32 UserApp1_u32DataMsgCount = 0;             /* Counts the number of ANT_DATA packets received */
-static u32 UserApp1_u32TickMsgCount = 0;             /* Counts the number of ANT_TICK packets received */
-
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
 
@@ -76,16 +73,7 @@ static void UserApp1SM_AntConfigureMaster();
 static void UserApp1SM_AntConfigureSlave();
 void AntGetdBmAscii(s8 s8RssiValue_, u8* pu8Result_);
 
-static u8 UserApp1_au8Data[9]="0\0\0\0\0\0\0\0";
-<<<<<<< HEAD
-static bool bHiderAndSeeker=FALSE;
-static u8 UserApp1_au8LcdInformationMessage[] = "M:-xx dBm S:-xx dbm";
-static bool bFound=FALSE;
-=======
-static bool bHider=FALSE;
-static bool bSeeker=FALSE;
-static u8 UserApp1_au8LcdInformationMessage[] = "M:-xx dBm  S:-xx dBm";
->>>>>>> parent of 7b79244... 11.15 18：13
+static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -113,7 +101,7 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  
+  /*Introduction*/
   u8 au8Title[] = "Hide and Seek";
   u8 au8Instructions[] = "B0 Begin Game";
   
@@ -134,7 +122,7 @@ void UserApp1Initialize(void)
   LedOff(LCD_RED);
 
   /* Configure Slave ANT for this application */
-  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_1;
+  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_USERAPP;
   UserApp1_sSlaveChannel.AntChannelType      = CHANNEL_TYPE_SLAVE;
   UserApp1_sSlaveChannel.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
   UserApp1_sSlaveChannel.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
@@ -148,30 +136,29 @@ void UserApp1Initialize(void)
   UserApp1_sSlaveChannel.AntNetwork = ANT_NETWORK_DEFAULT;
   
     /* Configure Master ANT for this application */
-  UserApp1_sSlaveChannel.AntChannel          = ANT_CHANNEL_0;
-  UserApp1_sSlaveChannel.AntChannelType      = CHANNEL_TYPE_MASTER;
-  UserApp1_sSlaveChannel.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
-  UserApp1_sSlaveChannel.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
+  UserApp1_sMasterChannel.AntChannel          = ANT_CHANNEL_USERAPP;
+  UserApp1_sMasterChannel.AntChannelType      = CHANNEL_TYPE_MASTER;
+  UserApp1_sMasterChannel.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
+  UserApp1_sMasterChannel.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
 
-  UserApp1_sSlaveChannel.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
-  UserApp1_sSlaveChannel.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
-  UserApp1_sSlaveChannel.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
-  UserApp1_sSlaveChannel.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
-  UserApp1_sSlaveChannel.AntFrequency        = ANT_FREQUENCY_USERAPP;
-  UserApp1_sSlaveChannel.AntTxPower          = ANT_TX_POWER_USERAPP;
-  UserApp1_sSlaveChannel.AntNetwork = ANT_NETWORK_DEFAULT;
+  UserApp1_sMasterChannel.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
+  UserApp1_sMasterChannel.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
+  UserApp1_sMasterChannel.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
+  UserApp1_sMasterChannel.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
+  UserApp1_sMasterChannel.AntFrequency        = ANT_FREQUENCY_USERAPP;
+  UserApp1_sMasterChannel.AntTxPower          = ANT_TX_POWER_USERAPP;
+  UserApp1_sMasterChannel.AntNetwork = ANT_NETWORK_DEFAULT;
   
   for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
   {
     sAntSetupData.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
   }
 
-  AntAssignChannel(&UserApp1_sMasterChannel);
   UserApp1_u32Timeout = G_u32SystemTime1ms;
   /* If good initialization, set state to Idle */
-  if( 1 )
+  if(AntAssignChannel(&UserApp1_sSlaveChannel))
   {
-    UserApp1_StateMachine = UserApp1SM_AntConfigureMaster;
+    UserApp1_StateMachine = UserApp1SM_WaitChannelAssign;
   }
   else
   {
@@ -183,161 +170,6 @@ void UserApp1Initialize(void)
 } /* end UserApp1Initialize() */
 
 
-/*----------------------------------------------------------------------------------------------------------------------
-Function UserApp1RunActiveState()
-
-Description:
-Selects and runs one iteration of the current state in the state machine.
-All state machines have a TOTAL of 1ms to execute, so on average n state machines
-may take 1ms / n to execute.
-
-Requires:
-  - State machine function pointer points at current state
-
-Promises:
-  - Calls the function to pointed by the state machine function pointer
-*/
-void UserApp1RunActiveState(void)
-{
-  LedNumberType aeLedDisplayLevels[] = {RED, ORANGE, YELLOW, GREEN, CYAN, BLUE, PURPLE, WHITE};
-  s8 as8dBmLevels[] = {DBM_LEVEL1, DBM_LEVEL2, DBM_LEVEL3, DBM_LEVEL4, 
-                       DBM_LEVEL5, DBM_LEVEL6, DBM_LEVEL7, DBM_LEVEL8};
-  u8 u8EventCode;
-    
-  static u8 u32MasterMessageCounter = 0;
-  static s8 s8RssiChannel0 = -99;
-  static s8 s8RssiChannel1 = -99;
-  static s8 s8StrongestRssi = -99;
-
-  /* Monitor ANT messages: looking for any incoming messages
-  that indicates a matching device has been located. */
-  if( AntReadAppMessageBuffer() )
-  {
-    /* Check the message class to determine how to process the message */
-    if(G_eAntApiCurrentMessageClass == ANT_TICK)
-    {
-      UserApp1_u32TickMsgCount++;
-      /* Get the EVENT code from the ANT_TICK message */ 
-      u8EventCode = G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX];
-      
-      /* Slave devices get different event codes than masters, so handle seperately */
-      if(G_sAntApiCurrentMessageExtData.u8Channel == 0)
-      {
-        switch (u8EventCode)
-        {
-          case EVENT_TX:
-          {
-            /* Keep track of message and update LCD if too many messages have been sent
-            without any being received.  The counter is cleared whenever the Master channel
-            receives a message from the Slave it is trying to talk to. */
-            u32MasterMessageCounter++;
-            if(u32MasterMessageCounter >= 8)
-            {
-              s8RssiChannel0 = DBM_LEVEL1;
-              LedOff(LCD_RED);
-              UserApp1_au8LcdInformationMessage[INDEX_MASTER_DBM + 1] = 'x';
-              UserApp1_au8LcdInformationMessage[INDEX_MASTER_DBM + 2] = 'x';
-            }
-            break;
-          }
-          default:
-          {
-            DebugPrintf("Master unhandled event\n\n\r");
-            break;
-          }
-        } /* end switch u8EventCode */
-      } /* end if(G_sAntApiCurrentMessageExtData.u8Channel == 0) */
-
-      if(G_sAntApiCurrentMessageExtData.u8Channel == 1)
-      {
-        /* Check the Event code and respond */
-        switch (u8EventCode)
-        {
-          case EVENT_RX_FAIL_GO_TO_SEARCH:
-          {
-            s8RssiChannel1 = DBM_LEVEL1;
-            LedOff(LCD_BLUE);
-            UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM + 1] = 'x';
-            UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM + 2] = 'x';
-            break;
-          }
-          
-          default:
-          {
-            DebugPrintf("Slave unhandled event\n\n\r");
-            break;
-          }
-        } /* end switch u8EventCode */
-      } /* end if(G_sAntApiCurrentMessageExtData.u8Channel == 1) */
-    } /* end if(G_eAntApiCurrentMessageClass == ANT_TICK) */
-
-    
-    /* Check for DATA messages */
-    if(G_eAntApiCurrentMessageClass == ANT_DATA)
-    {
-      UserApp1_u32DataMsgCount++;
-      /* Check the channel number and update LED */
-      if(G_sAntApiCurrentMessageExtData.u8Channel == 0)
-      {
-        /* Reset the message counter */
-        u32MasterMessageCounter = 0;
-        
-        /* Channel 0 is red (but don't touch blue or green) */
-        LedOn(LCD_RED);
-        
-        /* Record RSSI level and update LCD message */
-        s8RssiChannel0 = G_sAntApiCurrentMessageExtData.s8RSSI;
-        AntGetdBmAscii(s8RssiChannel0, &UserApp1_au8LcdInformationMessage[INDEX_MASTER_DBM]);
-      }
-      
-      if(G_sAntApiCurrentMessageExtData.u8Channel == 1)
-      {
-        /* When the slave receives a message, queue a response message */
-        AntQueueBroadcastMessage(ANT_CHANNEL_1, UserApp1_au8Data);
-
-        /* Channel 1 is Blue (but don't touch red or green) */
-        LedOn(LCD_BLUE);
-
-        /* Record RSSI level and update LCD message */
-        s8RssiChannel1 = G_sAntApiCurrentMessageExtData.s8RSSI;
-        AntGetdBmAscii(s8RssiChannel1, &UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM]);
-      }
-                            
-      
-    } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
-
-    /* Make sure LCD has the current message - this should happen infrequently
-    enough to no cause problems, but if that's untrue this needs to be throttled back */
-    LCDMessage(LINE1_START_ADDR, UserApp1_au8LcdInformationMessage);
-    
-    /* Update the strongest signal being received */
-    s8StrongestRssi = s8RssiChannel0;
-    if(s8RssiChannel1 > s8RssiChannel0)
-    {
-      s8StrongestRssi = s8RssiChannel1;
-    }
-
-    /* Loop through all of the levels to check which LEDs to turn on */
-    for(u8 i = 0; i < NUM_DBM_LEVELS; i++)
-    {
-      if(s8StrongestRssi > as8dBmLevels[i])
-      {
-        LedOn(aeLedDisplayLevels[i]);
-      }
-      else
-      {
-        LedOff(aeLedDisplayLevels[i]);
-      }
-    }
-    
-    if(s8StrongestRssi==DBM_LEVEL1)
-    {
-      bFound=TRUE;
-    }
-  }
-} /* end UserApp1RunActiveState */
-
-
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -345,174 +177,340 @@ void UserApp1RunActiveState(void)
 /**********************************************************************************************************************
 State Machine Function Definitions
 **********************************************************************************************************************/
-static void UserApp1SM_AntConfigureMaster(void)
+static void UserApp1SM_AntConfigureSlave(void)
 {
-    /* Wait for the ANT master channel to be configured */
-  if(AntRadioStatusChannel(ANT_CHANNEL_0) == ANT_CONFIGURED)
+  /* If good, set state to WaitChannelAssign */
+  if( AntAssignChannel(&UserApp1_sSlaveChannel) )
   {
-    DebugPrintf("Master channel configured\n\n\r");
-    
-    /* Queue configuration of Slave channel */
-    AntAssignChannel(&UserApp1_sSlaveChannel);
+    /* Channel assignment is queued so start timer */
     UserApp1_u32Timeout = G_u32SystemTime1ms;
-    UserApp1_StateMachine = UserApp1SM_AntConfigureSlave;
+   
+    UserApp1_StateMachine = UserApp1SM_WaitChannelAssign;
   }
-  
-  /* Check for timeout */
-  if( IsTimeUp(&UserApp1_u32Timeout, 2000) )
+  else
   {
-    LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE1_START_ADDR, "Master config failed");
-    UserApp1_StateMachine = UserApp1SM_Error;    
+    UserApp1_StateMachine = UserApp1SM_Error;
   }
 }
 
-static void UserApp1SM_AntConfigureSlave(void)
+static void UserApp1SM_AntConfigureMaster(void)
 {
-    /* Wait for the ANT slave channel to be configured */
-  if(AntRadioStatusChannel(ANT_CHANNEL_1) == ANT_CONFIGURED)
+  /* If good, set state to WaitChannelAssign */
+  if( AntAssignChannel(&UserApp1_sMasterChannel) )
   {
-    DebugPrintf("Slave channel configured\n\n\r");
-    
-    /* Update the broadcast message data to send the user's name the go to Idle */
-    AntQueueBroadcastMessage(ANT_CHANNEL_0, UserApp1_au8Data);
-    AntQueueBroadcastMessage(ANT_CHANNEL_1, UserApp1_au8Data);
+    /* Channel assignment is queued so start timer */
+    UserApp1_u32Timeout = G_u32SystemTime1ms;
+   
+    UserApp1_StateMachine = UserApp1SM_WaitChannelAssign;
+  }
+  else
+  {
+    UserApp1_StateMachine = UserApp1SM_Error;
+  }
+}
 
+
+/* Wait for the ANT channel assignment to finish */
+static void UserApp1SM_WaitChannelAssign(void)
+{
+  /* Check if the channel assignment is complete */
+  if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_CONFIGURED)
+  {
+    AntOpenChannelNumber(ANT_CHANNEL_USERAPP);
+    /* Set timer and advance states */
+    UserApp1_u32Timeout = G_u32SystemTime1ms;
+    UserApp1_StateMachine = UserApp1SM_WaitChannelOpen;
+  }
+  
+  /* Monitor for timeout */
+  if( IsTimeUp(&UserApp1_u32Timeout, 5000) )
+  {
+    DebugPrintf("\n\r***Channel assignment timeout***\n\n\r");
+    UserApp1_StateMachine = UserApp1SM_Error;
+  }
+      
+} /* end UserApp1SM_WaitChannelAssign() */
+
+static void UserApp1SM_WaitChannelOpen(void)
+{
+  /* Monitor the channel status to check if channel is opened */
+  if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_OPEN)
+  {
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   
   /* Check for timeout */
-  if( IsTimeUp(&UserApp1_u32Timeout,2000) )
+  if( IsTimeUp(&UserApp1_u32Timeout, TIMEOUT_VALUE) )
   {
-    LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE1_START_ADDR, "Slave config failed");
-    UserApp1_StateMachine = UserApp1SM_Error;    
+    AntCloseChannelNumber(ANT_CHANNEL_USERAPP);
+    UserApp1_StateMachine = UserApp1SM_Error;
+    
   }
-}
+    
+} /* end UserApp1SM_WaitChannelOpen() */
 
-/*
-static void UserApp1SM_HiderAndSeeker(void)
+static void UserApp1SM_WaitChannelClose(void)
 {
-  static u8 au8HiderMessage[]={0,0,0,0,0,0,0,0};
-  static bool bHiderFound=FALSE;
-  
-  LCDCommand(LCD_CLEAR_CMD);
-  LCDMessage(LINE1_START_ADDR,"HIDE!");
-  
-  if(!bHiderFound)
+  /* Monitor the channel status to check if channel is closed */
+  if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_CLOSED)
   {
-    UserApp1RunActiveState();
-    AntQueueBroadcastMessage(ANT_CHANNEL_0,au8HiderMessage);
-
-<<<<<<< HEAD
-    if(bFound==TRUE)
-    {
-       bHiderFound=TRUE;
-       LCDCommand(LCD_CLEAR_CMD);
-       LCDMessage(LINE1_START_ADDR,"I was Found");
-=======
-      if(G_eAntApiCurrentMessageClass == ANT_DATA)
-      {
-        bHiderFound=TRUE;
-        LCDCommand(LCD_CLEAR_CMD);
-        LCDMessage(LINE1_START_ADDR,"Found You");
-        
-        UserApp1_StateMachine=UserApp1SM_Idle;
-      }
->>>>>>> parent of 7b79244... 11.15 18：13
-    }
+    UserApp1_StateMachine = UserApp1SM_Idle;
   }
   
-  UserApp1_StateMachine=UserApp1SM_Idle;
-}
-*/
+  /* Check for timeout */
+  if( IsTimeUp(&UserApp1_u32Timeout, TIMEOUT_VALUE) )
+  {
+    UserApp1_StateMachine = UserApp1SM_Error;
+  }
+    
+} /* end UserApp1SM_WaitChannelClose() */
 
-static void UserApp1SM_HiderAndSeeker(void)
+static void UserApp1SM_Hider(void)
 {
-  static u8 au8SeekerMessage[]={1,1,1,1,1,1,1,1};
-  static u8 u8CountDown[]={10};
-  static s8 sSeekerRssi=0;
-  static bool bCountEnd=FALSE;
-  static bool bBeginRecieveMessageFromHider;
+  static u8 au8TestMessage[]={0,0,0,0,0xA5,0,0,0};
+  static u8 au8CountDown[]="x";
+  static u16 u16CountDown=3001;
+  static bool bCountEnd=FALSE;  
   
   /*the game don't begin untill Countdown end*/
-  if(u8CountDown[0]>=1&&!bCountEnd)
+  if(u16CountDown!=0&&!bCountEnd)
   {
-    u8CountDown[0]--;
-    LCDMessage(LINE1_START_ADDR,"CountDown:");
-    LCDMessage(LINE1_START_ADDR+12,u8CountDown);
+    u16CountDown--;
+    if(au8CountDown[0]%1000==0)
+    {
+      au8CountDown[0]=u16CountDown/1000+'0';
+      LCDMessage(LINE1_START_ADDR,"CountDown:");
+      LCDMessage(LINE1_START_ADDR+12,au8CountDown);    
+    }
+
   }
-  
-  if(u8CountDown[0]==0)
+
+  if(u16CountDown==0)
   {
     bCountEnd=TRUE;
-    bBeginRecieveMessageFromHider=TRUE;
     LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE2_START_ADDR,"Hider:Coming!");
-    LCDMessage(LINE2_START_ADDR,"Seeker:Here I come!");
-     
-    if(bBeginRecieveMessageFromHider)
-    { 
-      UserApp1RunActiveState();
-    }  
-    
-    if(bFound==TRUE)
+    LCDMessage(LINE2_START_ADDR,"Status:Hide");
+        
+    if( AntReadAppMessageBuffer() )
     {
-      LCDCommand(LCD_CLEAR_CMD);
-      LCDMessage(LINE1_START_ADDR,"Seeker:Found you!");
-      LCDMessage(LINE2_START_ADDR,"Hider:You found me!");
-    }
-  }
+       /* New message from seeker, meaning found, go to found state */
+      if(G_eAntApiCurrentMessageClass == ANT_DATA)
+      {
+        LCDCommand(LCD_CLEAR_CMD);
+        LCDMessage(LINE2_START_ADDR,"Status:Founded");
+      }
+      else if(G_eAntApiCurrentMessageClass == ANT_TICK)
+      {
+       /* Update and queue the new message data */
+        au8TestMessage[7]++;
+        if(au8TestMessage[7] == 0)
+        {
+          au8TestMessage[6]++;
+          if(au8TestMessage[6] == 0)
+          {
+            au8TestMessage[5]++;
+          }
+        }
+        AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8TestMessage);
+      }
+    } /* end AntReadData() */
+}
   
   UserApp1_StateMachine = UserApp1SM_Idle;
 }
 
+static void UserApp1SM_Seeker(void)
+{
+  LedNumberType aeLedDisplayLevels[] = {RED, ORANGE, YELLOW, GREEN, 
+                                        CYAN, BLUE, PURPLE, WHITE};
+  s8 as8dBmLevels[] = {DBM_LEVEL1, DBM_LEVEL2, DBM_LEVEL3, DBM_LEVEL4, 
+                       DBM_LEVEL5, DBM_LEVEL6, DBM_LEVEL7, DBM_LEVEL8};  
+  static u8 au8CountDown[]="x";
+  static u8 au8FoundMessage[]= {1, 1, 1, 1, 1, 1, 1, 1};
+  static s8 sSeekerRssi=-99;
+  static u16 u16AfterFoundCounter=0;
+  static u16 u16CountDown=3001;
+  static bool bCountEnd=FALSE;
+  static bool bShowStatus=TRUE;
+  static bool bSendMessageToHider=FALSE;
 
-
+  /*Show the CountDown*/
+  if(u16CountDown!=0&&!bCountEnd)
+  {
+    u16CountDown--;
+    if(au8CountDown[0]%1000==0)
+    {
+      au8CountDown[0]=u16CountDown/1000+'0';
+      LCDMessage(LINE1_START_ADDR,"CountDown:");
+      LCDMessage(LINE1_START_ADDR+12,au8CountDown);    
+    }
+  }
+  
+  if(u16CountDown==0)
+  {
+    if(bShowStatus)
+    {
+      LCDCommand(LCD_CLEAR_CMD);
+      LCDMessage(LINE1_START_ADDR,"Ready or not");
+      LCDMessage(LINE2_START_ADDR,"Here I come!");
+      bShowStatus=FALSE;
+    }
+    
+    /*Get the messages from Hider*/
+    if( AntReadAppMessageBuffer() )
+    {
+      /* New data message: check what it is */
+      if(G_eAntApiCurrentMessageClass == ANT_DATA)
+      {
+        for(u8 i = 0; i < ANT_APPLICATION_MESSAGE_BYTES; i++)
+        {
+          if(G_au8AntApiCurrentMessageBytes[i] != au8LastAntData[i])
+          {
+            au8LastAntData[i] = G_au8AntApiCurrentMessageBytes[i];
+          }
+        }
+        
+        /*Get the Rssi*/
+        sSeekerRssi=G_sAntApiCurrentMessageExtData.s8RSSI;
+        
+        /* Loop through all of the levels to check which LEDs to turn on */
+        for(u8 i = 0; i < NUM_DBM_LEVELS; i++)
+        {
+          if(sSeekerRssi > as8dBmLevels[i])
+          {
+            LedOn(aeLedDisplayLevels[i]);
+          }
+          else
+          {
+            LedOff(aeLedDisplayLevels[i]);
+          }
+        }
+        
+        if(sSeekerRssi==DBM_LEVEL8)
+        {
+          LCDCommand(LCD_CLEAR_CMD);          
+          LCDMessage(LINE1_START_ADDR,"Found you!");     
+          AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8FoundMessage);
+          bSendMessageToHider=TRUE;
+          u16CountDown=3001;
+        }
+      } /*end if(G_eAntApiCurrentMessageClass == ANT_DATA)*/    
+    }/*end AntReadAppMessageBuffer()*/
+    
+    /*After found the hider*/
+    if(bSendMessageToHider)
+    {
+      u16AfterFoundCounter++;
+      LedBlink(WHITE,LED_4HZ);
+      LedBlink(PURPLE,LED_4HZ);
+      LedBlink(BLUE,LED_4HZ);
+      LedBlink(CYAN,LED_4HZ);
+      LedBlink(GREEN,LED_4HZ);
+      LedBlink(YELLOW,LED_4HZ);
+      LedBlink(ORANGE,LED_4HZ);
+      LedBlink(RED,LED_4HZ);
+    }
+    
+    /*10s countdown*/
+    if(u16AfterFoundCounter==10000)
+    {
+      bSendMessageToHider=FALSE;
+      u16AfterFoundCounter=0;
+      LedOff(WHITE);
+      LedOff(PURPLE);
+      LedOff(BLUE);
+      LedOff(CYAN);
+      LedOff(GREEN);
+      LedOff(YELLOW);
+      LedOff(ORANGE);
+      LedOff(RED);
+      PWMAudioSetFrequency(BUZZER1,0);
+      
+      AntCloseChannelNumber(ANT_CHANNEL_USERAPP);
+      UserApp1_u32Timeout=G_u32SystemTime1ms;
+      UserApp1_StateMachine=UserApp1SM_WaitChannelClose;
+    }
+  }
+}
   /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for a message to be queued */
 static void UserApp1SM_Idle(void)
 {
   static bool bChooseTheHider=FALSE; 
-  static bool bChooseTheSeeker=FALSE;
-  static u16 u16Count=0;
+  static bool bReseted=TRUE;
+  static bool bGotNewData = FALSE;
+  static bool bDisplay = FALSE;
   
-  u16Count++;
-
-  /* Look for BUTTON 0 to open channel */
-  if(WasButtonPressed(BUTTON0))
+  
+  if(!bDisplay)
   {
-    /* Got the button, so complete one-time actions before next state */
-    ButtonAcknowledge(BUTTON0);
-
-    if(bChooseTheHider==FALSE)
+    LCDCommand(LCD_CLEAR_CMD);
+    LCDMessage(LINE1_START_ADDR,"Hide and Go Seek!");
+    LCDMessage(LINE2_START_ADDR,"Press B0 to Start");
+  }
+  
+  if(bReseted)
+  {
+    /* Check if got new data */
+    if(AntReadAppMessageBuffer())
     {
-      AntUnassignChannelNumber(ANT_CHANNEL_0);
-      AntAssignChannel(&UserApp1_sMasterChannel);
-      UserApp1_u32Timeout = G_u32SystemTime1ms;
-      //AntOpenChannelNumber(ANT_CHANNEL_0);
-      //AntOpenChannelNumber(ANT_CHANNEL_1);
-      bChooseTheHider=TRUE;
-      UserApp1_StateMachine = UserApp1SM_AntConfigureMaster;
-    }   
-  }
-  
-  if(bChooseTheSeeker==FALSE)
-  {
-    bChooseTheSeeker=TRUE;
-    AntAssignChannel(&UserApp1_sSlaveChannel);
-    UserApp1_StateMachine = UserApp1SM_AntConfigureSlave;
-    AntOpenChannelNumber(ANT_CHANNEL_0);
-    AntOpenChannelNumber(ANT_CHANNEL_1);
-
-  }
-
-  if(bHiderAndSeeker)
-  {
-    UserApp1_StateMachine = UserApp1SM_HiderAndSeeker;
-  }
-
+      if(G_eAntApiCurrentMessageClass==ANT_DATA)
+      {
+        bGotNewData=FALSE;
+        for(u8 i =0;i<ANT_APPLICATION_MESSAGE_BYTES;i++)
+        {
+          if(G_au8AntApiCurrentMessageBytes[i]!=au8LastAntData[i])
+          {
+            bGotNewData=TRUE;
+            au8LastAntData[i]=G_au8AntApiCurrentMessageBytes[i];
+          }
+        }
+      }
+      /* When got new data, meaning pared, go to the seeker state */
+      if(bGotNewData==TRUE)
+      {
+        bReseted=FALSE;
+        UserApp1_StateMachine=UserApp1SM_Seeker;
+      }
+    }
     
+    /* Look for BUTTON 0 to open channel */
+    if(WasButtonPressed(BUTTON0))
+    {
+      /* Got the button, so complete one-time actions before next state */
+      ButtonAcknowledge(BUTTON0);
+
+      if(bChooseTheHider==FALSE)
+      {
+        AntCloseChannelNumber(ANT_CHANNEL_USERAPP);
+        AntUnassignChannelNumber(ANT_CHANNEL_USERAPP);
+        AntAssignChannel(&UserApp1_sMasterChannel);
+        UserApp1_u32Timeout=G_u32SystemTime1ms;
+        bChooseTheHider=TRUE;
+        UserApp1_StateMachine=UserApp1SM_AntConfigureMaster;
+      }           
+    }
+    else
+    {
+      /*the sSlaveChannel unassign*/
+      if(!AntAssignChannel(&UserApp1_sSlaveChannel))
+      {
+        AntCloseChannelNumber(ANT_CHANNEL_USERAPP);
+        AntUnassignChannelNumber(ANT_CHANNEL_USERAPP);
+        AntAssignChannel(&UserApp1_sSlaveChannel);
+        UserApp1_u32Timeout=G_u32SystemTime1ms;
+        UserApp1_StateMachine=UserApp1SM_AntConfigureSlave;      
+      }
+    }
+    
+    /*Go to the Hider state*/
+    if(bChooseTheHider==TRUE)
+    {
+      bDisplay=TRUE;
+      bReseted=TRUE;
+      UserApp1_StateMachine=UserApp1SM_Hider;
+    }
+  }   
 } /* end UserApp1SM_Idle() */
      
 

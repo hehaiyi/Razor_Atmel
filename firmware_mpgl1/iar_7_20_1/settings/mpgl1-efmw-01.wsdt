@@ -10,19 +10,11 @@
     <Static>
       <Workspace>
         <ColumnWidths>
-<<<<<<< HEAD
-          <Column0>124</Column0>
+          <Column0>122</Column0>
           <Column1>27</Column1>
           <Column2>27</Column2>
           <Column3>27</Column3>
         </ColumnWidths>
-=======
-          
-          
-          
-          
-        <Column0>203</Column0><Column1>27</Column1><Column2>27</Column2><Column3>27</Column3></ColumnWidths>
->>>>>>> parent of 7b79244... 11.15 18：13
       </Workspace>
       <Build>
         <ColumnWidth0>20</ColumnWidth0>
@@ -30,40 +22,48 @@
         <ColumnWidth2>372</ColumnWidth2>
         <ColumnWidth3>93</ColumnWidth3>
       </Build>
+      <Select-Ambiguous-Definitions>
+        <ColumnWidth0>327</ColumnWidth0>
+        <ColumnWidth1>46</ColumnWidth1>
+        <ColumnWidth2>561</ColumnWidth2>
+      </Select-Ambiguous-Definitions>
     </Static>
     <Windows>
-<<<<<<< HEAD
       <Wnd0>
-=======
-      
-    <Wnd2>
->>>>>>> parent of 7b79244... 11.15 18：13
         <Tabs>
           <Tab>
-            <Identity>TabID-20624-14823</Identity>
+            <Identity>TabID-25488-13053</Identity>
             <TabName>Workspace</TabName>
             <Factory>Workspace</Factory>
             <Session>
               <NodeDict>
                 <ExpandedNode>mpgl1-efmw-01</ExpandedNode>
                 <ExpandedNode>mpgl1-efmw-01/Application</ExpandedNode>
+                <ExpandedNode>mpgl1-efmw-01/Application/Include</ExpandedNode>
+                <ExpandedNode>mpgl1-efmw-01/Application/Source</ExpandedNode>
                 <ExpandedNode>mpgl1-efmw-01/Output</ExpandedNode>
-                <ExpandedNode>mpgl1-efmw-01/_BSP</ExpandedNode>
                 <ExpandedNode>mpgl1-efmw-01/_CMSIS</ExpandedNode>
                 <ExpandedNode>mpgl1-efmw-01/_Drivers</ExpandedNode>
+                <ExpandedNode>mpgl1-efmw-01/_Drivers/Include</ExpandedNode>
+                <ExpandedNode>mpgl1-efmw-01/_Drivers/Source</ExpandedNode>
               </NodeDict>
             </Session>
           </Tab>
         </Tabs>
-<<<<<<< HEAD
         <SelectedTab>0</SelectedTab>
       </Wnd0>
       <Wnd1>
         <Tabs>
           <Tab>
-            <Identity>TabID-9353-14830</Identity>
+            <Identity>TabID-13171-13079</Identity>
             <TabName>Build</TabName>
             <Factory>Build</Factory>
+            <Session/>
+          </Tab>
+          <Tab>
+            <Identity>TabID-3929-17755</Identity>
+            <TabName>Ambiguous Definitions</TabName>
+            <Factory>Select-Ambiguous-Definitions</Factory>
             <Session/>
           </Tab>
         </Tabs>
@@ -80,9 +80,9 @@
           <SelStart>0</SelStart>
           <SelEnd>0</SelEnd>
           <XPos2>0</XPos2>
-          <YPos2>395</YPos2>
-          <SelStart2>13003</SelStart2>
-          <SelEnd2>13003</SelEnd2>
+          <YPos2>313</YPos2>
+          <SelStart2>13764</SelStart2>
+          <SelEnd2>13764</SelEnd2>
         </Tab>
         <ActiveTab>0</ActiveTab>
         <Tab>
@@ -93,9 +93,21 @@
           <SelStart>0</SelStart>
           <SelEnd>0</SelEnd>
           <XPos2>0</XPos2>
-          <YPos2>28</YPos2>
-          <SelStart2>3237</SelStart2>
-          <SelEnd2>3247</SelEnd2>
+          <YPos2>17</YPos2>
+          <SelStart2>3496</SelStart2>
+          <SelEnd2>3506</SelEnd2>
+        </Tab>
+        <Tab>
+          <Factory>TextEditor</Factory>
+          <Filename>$WS_DIR$\..\..\firmware_mpg_common\drivers\ant_api.c</Filename>
+          <XPos>0</XPos>
+          <YPos>0</YPos>
+          <SelStart>0</SelStart>
+          <SelEnd>0</SelEnd>
+          <XPos2>0</XPos2>
+          <YPos2>369</YPos2>
+          <SelStart2>18950</SelStart2>
+          <SelEnd2>18974</SelEnd2>
         </Tab>
       </Pane>
       <ActivePane>0</ActivePane>
@@ -111,9 +123,9 @@
       <Top>
         <Row0>
           <Sizes>
-            <Toolbar-05DF5AB8>
+            <Toolbar-04F892A0>
               <key>iaridepm.enu1</key>
-            </Toolbar-05DF5AB8>
+            </Toolbar-04F892A0>
           </Sizes>
         </Row0>
       </Top>
@@ -124,16 +136,16 @@
               <Rect>
                 <Top>-2</Top>
                 <Left>-2</Left>
-                <Bottom>794</Bottom>
-                <Right>198</Right>
+                <Bottom>785</Bottom>
+                <Right>213</Right>
                 <x>-2</x>
                 <y>-2</y>
                 <xscreen>200</xscreen>
                 <yscreen>200</yscreen>
-                <sizeHorzCX>104167</sizeHorzCX>
-                <sizeHorzCY>192864</sizeHorzCY>
-                <sizeVertCX>104167</sizeVertCX>
-                <sizeVertCY>767599</sizeVertCY>
+                <sizeHorzCX>208768</sizeHorzCX>
+                <sizeHorzCY>194553</sizeHorzCY>
+                <sizeVertCX>224426</sizeVertCX>
+                <sizeVertCY>765564</sizeVertCY>
               </Rect>
             </Wnd0>
           </Sizes>
@@ -152,15 +164,15 @@
                 <Top>-2</Top>
                 <Left>-2</Left>
                 <Bottom>198</Bottom>
-                <Right>1922</Right>
+                <Right>960</Right>
                 <x>-2</x>
                 <y>-2</y>
-                <xscreen>1924</xscreen>
+                <xscreen>962</xscreen>
                 <yscreen>200</yscreen>
-                <sizeHorzCX>1002083</sizeHorzCX>
-                <sizeHorzCY>192864</sizeHorzCY>
-                <sizeVertCX>104167</sizeVertCX>
-                <sizeVertCY>192864</sizeVertCY>
+                <sizeHorzCX>1004175</sizeHorzCX>
+                <sizeHorzCY>194553</sizeHorzCY>
+                <sizeVertCX>208768</sizeVertCX>
+                <sizeVertCY>194553</sizeVertCY>
               </Rect>
             </Wnd1>
           </Sizes>
@@ -170,23 +182,6 @@
         <Sizes/>
       </Float>
     </Positions>
-=======
-        
-      <SelectedTab>0</SelectedTab></Wnd2><Wnd3><Tabs><Tab><Identity>TabID-32432-14467</Identity><TabName>Build</TabName><Factory>Build</Factory><Session/></Tab><Tab><Identity>TabID-12336-15048</Identity><TabName>Find in Files</TabName><Factory>Find-in-Files</Factory><Session/></Tab><Tab><Identity>TabID-2886-21775</Identity><TabName>Debug Log</TabName><Factory>Debug-Log</Factory><Session/></Tab><Tab><Identity>TabID-21412-20167</Identity><TabName>Ambiguous Definitions</TabName><Factory>Select-Ambiguous-Definitions</Factory><Session/></Tab><Tab><Identity>TabID-19493-29347</Identity><TabName>Declarations</TabName><Factory>Find-All-Declarations</Factory><Session/></Tab></Tabs><SelectedTab>3</SelectedTab></Wnd3></Windows>
-    <Editor>
-      
-      
-      
-      
-    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\application\main.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>10</YPos2><SelStart2>1657</SelStart2><SelEnd2>1657</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\firmware_mpg_common\drivers\antdefines.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>55</YPos2><SelStart2>3313</SelStart2><SelEnd2>3313</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\firmware_mpg_common\drivers\ant.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>1452</YPos2><SelStart2>58036</SelStart2><SelEnd2>58036</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\firmware_mpg_common\application\user_app1.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>216</YPos2><SelStart2>11195</SelStart2><SelEnd2>11195</SelEnd2></Tab><ActiveTab>3</ActiveTab></Pane><ActivePane>0</ActivePane><Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\firmware_mpg_common\drivers\ant.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>60</YPos2><SelStart2>3732</SelStart2><SelEnd2>3732</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\firmware_mpg_common\application\user_app1.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>3</XPos2><YPos2>12</YPos2><SelStart2>1902</SelStart2><SelEnd2>1902</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\firmware_mpg_common\drivers\ant_api.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>363</YPos2><SelStart2>18715</SelStart2><SelEnd2>18794</SelEnd2></Tab><ActiveTab>2</ActiveTab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\firmware_mpg_common\drivers\ant_api.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>58</YPos2><SelStart2>4902</SelStart2><SelEnd2>4902</SelEnd2></Tab></Pane><Sizes><Pane><X>439655</X><Y>1000000</Y></Pane><Pane><X>560344</X><Y>1000000</Y></Pane></Sizes><SplitMode>4</SplitMode></Editor>
-    <Positions>
-      
-      
-      
-      
-      
-    <Top><Row0><Sizes><Toolbar-06498F50><key>iaridepm.enu1</key></Toolbar-06498F50></Sizes></Row0></Top><Left><Row0><Sizes><Wnd2><Rect><Top>-2</Top><Left>-2</Left><Bottom>705</Bottom><Right>294</Right><x>-2</x><y>-2</y><xscreen>1229</xscreen><yscreen>78</yscreen><sizeHorzCX>640104</sizeHorzCX><sizeHorzCY>75217</sizeHorzCY><sizeVertCX>154167</sizeVertCX><sizeVertCY>681774</sizeVertCY></Rect></Wnd2></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd3><Rect><Top>-2</Top><Left>-2</Left><Bottom>287</Bottom><Right>1922</Right><x>-2</x><y>-2</y><xscreen>1924</xscreen><yscreen>289</yscreen><sizeHorzCX>1002083</sizeHorzCX><sizeHorzCY>278689</sizeHorzCY><sizeVertCX>116667</sizeVertCX><sizeVertCY>96432</sizeVertCY></Rect></Wnd3></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
->>>>>>> parent of 7b79244... 11.15 18：13
   </Desktop>
 </Workspace>
 
