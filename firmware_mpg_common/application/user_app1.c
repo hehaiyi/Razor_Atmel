@@ -77,9 +77,15 @@ static void UserApp1SM_AntConfigureSlave();
 void AntGetdBmAscii(s8 s8RssiValue_, u8* pu8Result_);
 
 static u8 UserApp1_au8Data[9]="0\0\0\0\0\0\0\0";
+<<<<<<< HEAD
 static bool bHiderAndSeeker=FALSE;
 static u8 UserApp1_au8LcdInformationMessage[] = "M:-xx dBm S:-xx dbm";
 static bool bFound=FALSE;
+=======
+static bool bHider=FALSE;
+static bool bSeeker=FALSE;
+static u8 UserApp1_au8LcdInformationMessage[] = "M:-xx dBm  S:-xx dBm";
+>>>>>>> parent of 7b79244... 11.15 18：13
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -398,11 +404,22 @@ static void UserApp1SM_HiderAndSeeker(void)
     UserApp1RunActiveState();
     AntQueueBroadcastMessage(ANT_CHANNEL_0,au8HiderMessage);
 
+<<<<<<< HEAD
     if(bFound==TRUE)
     {
        bHiderFound=TRUE;
        LCDCommand(LCD_CLEAR_CMD);
        LCDMessage(LINE1_START_ADDR,"I was Found");
+=======
+      if(G_eAntApiCurrentMessageClass == ANT_DATA)
+      {
+        bHiderFound=TRUE;
+        LCDCommand(LCD_CLEAR_CMD);
+        LCDMessage(LINE1_START_ADDR,"Found You");
+        
+        UserApp1_StateMachine=UserApp1SM_Idle;
+      }
+>>>>>>> parent of 7b79244... 11.15 18：13
     }
   }
   
