@@ -135,7 +135,7 @@ void UserApp1Initialize(void)
   UserApp1_sSlaveChannel.AntTxPower          = ANT_TX_POWER_USERAPP;
   UserApp1_sSlaveChannel.AntNetwork = ANT_NETWORK_DEFAULT;
   
-    /* Configure Master ANT for this application */
+  /* Configure Master ANT for this application */
   UserApp1_sMasterChannel.AntChannel          = ANT_CHANNEL_USERAPP;
   UserApp1_sMasterChannel.AntChannelType      = CHANNEL_TYPE_MASTER;
   UserApp1_sMasterChannel.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
@@ -155,6 +155,7 @@ void UserApp1Initialize(void)
   }
 
   UserApp1_u32Timeout = G_u32SystemTime1ms;
+  
   /* If good initialization, set state to Idle */
   if(AntAssignChannel(&UserApp1_sSlaveChannel))
   {
@@ -272,19 +273,20 @@ static void UserApp1SM_Hider(void)
   static u16 u16CountDown=3001;
   static bool bCountEnd=FALSE;  
   
-  /*the game don't begin untill Countdown end*/
+  /*Show the countdown*/
   if(u16CountDown!=0&&!bCountEnd)
   {
     u16CountDown--;
+    
     if(au8CountDown[0]%1000==0)
     {
       au8CountDown[0]=u16CountDown/1000+'0';
       LCDMessage(LINE1_START_ADDR,"CountDown:");
       LCDMessage(LINE1_START_ADDR+12,au8CountDown);    
     }
-
   }
-
+  
+  /*The countdown end*/
   if(u16CountDown==0)
   {
     bCountEnd=TRUE;
@@ -303,9 +305,11 @@ static void UserApp1SM_Hider(void)
       {
        /* Update and queue the new message data */
         au8TestMessage[7]++;
+        
         if(au8TestMessage[7] == 0)
         {
           au8TestMessage[6]++;
+          
           if(au8TestMessage[6] == 0)
           {
             au8TestMessage[5]++;
@@ -314,9 +318,7 @@ static void UserApp1SM_Hider(void)
         AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8TestMessage);
       }
     } /* end AntReadData() */
-}
-  
-  UserApp1_StateMachine = UserApp1SM_Idle;
+  }/*end u16CountDown*/
 }
 
 static void UserApp1SM_Seeker(void)
@@ -324,7 +326,11 @@ static void UserApp1SM_Seeker(void)
   LedNumberType aeLedDisplayLevels[] = {RED, ORANGE, YELLOW, GREEN, 
                                         CYAN, BLUE, PURPLE, WHITE};
   s8 as8dBmLevels[] = {DBM_LEVEL1, DBM_LEVEL2, DBM_LEVEL3, DBM_LEVEL4, 
-                       DBM_LEVEL5, DBM_LEVEL6, DBM_LEVEL7, DBM_LEVEL8};  
+                       DBM_LEVEL5, DBM_LEVEL6, DBM_LEVEL7, DBM_LEVEL8};
+  static u16 au16NotesLeft[]    = {F4, F4, A4, A4, D4, D4, F4, F4, 
+                                   A3S, A3S, D4, D4, C4, C4, E4, E4};
+  static u16 au16DurationLeft[] = {EN, EN, EN, EN, EN, EN, EN, EN, 
+                                   EN,  EN, EN, EN, EN, EN, EN, EN};
   static u8 au8CountDown[]="x";
   static u8 au8FoundMessage[]= {1, 1, 1, 1, 1, 1, 1, 1};
   static s8 sSeekerRssi=-99;
@@ -333,11 +339,14 @@ static void UserApp1SM_Seeker(void)
   static bool bCountEnd=FALSE;
   static bool bShowStatus=TRUE;
   static bool bSendMessageToHider=FALSE;
-
+  static u8 u8DurationCount=0;
+  static u8 u8NoteCount=0;
+    
   /*Show the CountDown*/
   if(u16CountDown!=0&&!bCountEnd)
   {
     u16CountDown--;
+    
     if(au8CountDown[0]%1000==0)
     {
       au8CountDown[0]=u16CountDown/1000+'0';
@@ -346,6 +355,7 @@ static void UserApp1SM_Seeker(void)
     }
   }
   
+  /*The countdown end*/
   if(u16CountDown==0)
   {
     if(bShowStatus)
@@ -386,6 +396,7 @@ static void UserApp1SM_Seeker(void)
           }
         }
         
+        /*Show the seeker has already find hider*/
         if(sSeekerRssi==DBM_LEVEL8)
         {
           LCDCommand(LCD_CLEAR_CMD);          
@@ -401,6 +412,7 @@ static void UserApp1SM_Seeker(void)
     if(bSendMessageToHider)
     {
       u16AfterFoundCounter++;
+      u8DurationCount++;
       LedBlink(WHITE,LED_4HZ);
       LedBlink(PURPLE,LED_4HZ);
       LedBlink(BLUE,LED_4HZ);
@@ -409,9 +421,24 @@ static void UserApp1SM_Seeker(void)
       LedBlink(YELLOW,LED_4HZ);
       LedBlink(ORANGE,LED_4HZ);
       LedBlink(RED,LED_4HZ);
+      
+      /*set Buzzer*/
+      if(u8DurationCount==au16DurationLeft[u8NoteCount])
+      {
+        u8DurationCount=0;
+        u8NoteCount++;
+        PWMAudioSetFrequency(BUZZER1,au16NotesLeft[u8NoteCount]);
+        PWMAudioOn(BUZZER1);
+      }
+      
+      /*implement music loop*/
+      if(u8NoteCount==(sizeof(au16DurationLeft)/2-1))
+      {
+        u8NoteCount=0;
+      }
     }
     
-    /*10s countdown*/
+    /*10s countdown to show seeker found hider*/
     if(u16AfterFoundCounter==10000)
     {
       bSendMessageToHider=FALSE;
@@ -425,12 +452,13 @@ static void UserApp1SM_Seeker(void)
       LedOff(ORANGE);
       LedOff(RED);
       PWMAudioSetFrequency(BUZZER1,0);
+      PWMAudioOff(BUZZER1);
       
       AntCloseChannelNumber(ANT_CHANNEL_USERAPP);
       UserApp1_u32Timeout=G_u32SystemTime1ms;
       UserApp1_StateMachine=UserApp1SM_WaitChannelClose;
-    }
-  }
+    }/*end if(u16AfterFoundCounter==10000)*/
+  }/*end if(u16CountDown==0)*/
 }
   /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for a message to be queued */
@@ -441,7 +469,7 @@ static void UserApp1SM_Idle(void)
   static bool bGotNewData = FALSE;
   static bool bDisplay = FALSE;
   
-  
+  /*Show some information*/
   if(!bDisplay)
   {
     LCDCommand(LCD_CLEAR_CMD);
@@ -449,6 +477,7 @@ static void UserApp1SM_Idle(void)
     LCDMessage(LINE2_START_ADDR,"Press B0 to Start");
   }
   
+  /*check the status*/
   if(bReseted)
   {
     /* Check if got new data */
@@ -479,7 +508,8 @@ static void UserApp1SM_Idle(void)
     {
       /* Got the button, so complete one-time actions before next state */
       ButtonAcknowledge(BUTTON0);
-
+      
+      /*did not choose the hider*/
       if(bChooseTheHider==FALSE)
       {
         AntCloseChannelNumber(ANT_CHANNEL_USERAPP);
@@ -510,7 +540,7 @@ static void UserApp1SM_Idle(void)
       bReseted=TRUE;
       UserApp1_StateMachine=UserApp1SM_Hider;
     }
-  }   
+  }/*end if(bReseted)*/   
 } /* end UserApp1SM_Idle() */
      
 
