@@ -392,31 +392,31 @@ static void UserApp1SM_ChannelOpen(void)
       if(G_eAntApiCurrentMessageClass == ANT_DATA)
       {
         UserApp1_u32DataMsgCount++;
-        bChannelOpen=TRUE;
+ /*     bChannelOpen=TRUE;
+          
+        if(bChannelOpen)
+        {
+          u16IniTimeCounter++;
+        }
         
-      if(bChannelOpen)
-      {
-        u16IniTimeCounter++;
-      }
-      
-      if(u16IniTimeCounter==25)
-      {
-        LCDClearChars(LINE1_START_ADDR, 20); 
-        LCDClearChars(LINE2_START_ADDR, 20); 
-        u16IniTimeCounter=0;
-        bChannelOpen=FALSE;
-        bDisplayInitMessage=FALSE;
-        LCDMessage(LINE1_START_ADDR,"Feature 1");
-        LCDMessage(LINE2_START_ADDR,"Feature 2");
-      }
-      
-      if(bDisplayInitMessage)
-      {
-        LCDCommand(LCD_CLEAR_CMD);
-        LCDMessage(LINE1_START_ADDR, au8ParingMessage); 
-        LCDMessage(LINE2_START_ADDR, au8WelcomeMessage);
-      }
-      
+        if(u16IniTimeCounter==25)
+        {
+          LCDClearChars(LINE1_START_ADDR, 20); 
+          LCDClearChars(LINE2_START_ADDR, 20); 
+          u16IniTimeCounter=0;
+          bChannelOpen=FALSE;
+          bDisplayInitMessage=FALSE;
+          LCDMessage(LINE1_START_ADDR,"Feature 1");
+          LCDMessage(LINE2_START_ADDR,"Feature 2");
+        }
+        
+        if(bDisplayInitMessage)
+        {
+          LCDCommand(LCD_CLEAR_CMD);
+          LCDMessage(LINE1_START_ADDR, au8ParingMessage); 
+          LCDMessage(LINE2_START_ADDR, au8WelcomeMessage);
+        }
+*/    
       /* We are synced with a device, so blue is solid */
       LedOff(GREEN);
       LedOn(BLUE);
@@ -439,8 +439,8 @@ static void UserApp1SM_ChannelOpen(void)
       {
         /* We got new data: show on LCD */
 #ifdef MPG1
-       // LCDClearChars(LINE2_START_ADDR, 20); 
-       // LCDMessage(LINE2_START_ADDR, au8DataContent); 
+        LCDClearChars(LINE2_START_ADDR, 20); 
+        LCDMessage(LINE2_START_ADDR, au8DataContent); 
 #endif /* MPG1 */    
     
 #ifdef MPG2
