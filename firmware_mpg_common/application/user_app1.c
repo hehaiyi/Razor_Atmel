@@ -301,19 +301,63 @@ static void UserApp1SM_WaitChannelOpen(void)
   }
     
 } /* end UserApp1SM_WaitChannelOpen() */
+/*
+  u8 au8ParingMessage[]="Paring Completely";
+  u8 au8WelcomeMessage[]="Welcome";
+  static u16 u16IniTimeCounter=0;
+  static bool bChannelOpen=FALSE;
+  static bool bDisplayInitMessage=TRUE;
 
-
+  
+  if( AntReadAppMessageBuffer())
+  {
+    if(G_eAntApiCurrentMessageClass == ANT_DATA)
+    {
+      bChannelOpen=TRUE;
+    }
+  
+  
+    if(bChannelOpen)
+    {
+      u16IniTimeCounter++;
+    }
+    
+    if(u16IniTimeCounter==3000)
+    {
+      LCDCommand(LCD_CLEAR_CMD);
+      u16IniTimeCounter=0;
+      bChannelOpen=FALSE;
+      bDisplayInitMessage=FALSE;
+      //LCDMessage(LINE1_START_ADDR,"Feature 1")
+      //LCDMessage(LINE2_START_ADDR,"Feature 2")
+    }
+    
+    if(bDisplayInitMessage)
+    {
+      LCDCommand(LCD_CLEAR_CMD);
+      LCDMessage(LINE1_START_ADDR, au8ParingMessage); 
+      LCDMessage(LINE2_START_ADDR, au8WelcomeMessage);
+    }
+  }
+  */
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Channel is open, so monitor data */
 static void UserApp1SM_ChannelOpen(void)
 {
+  u8 au8ParingMessage[]="Paring Completely";
+  u8 au8WelcomeMessage[]="Welcome";
+  static u16 u16IniTimeCounter=0;
+  static bool bChannelOpen=FALSE;
+  static bool bDisplayInitMessage=TRUE;
+  
+  
   static u8 u8LastState = 0xff;
   static u8 au8TickMessage[] = "EVENT x\n\r";  /* "x" at index [6] will be replaced by the current code */
   static u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   static u8 au8TestMessage[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
   bool bGotNewData;
-
+  
   /* Check for BUTTON0 to close channel */
   if(WasButtonPressed(BUTTON0))
   {
@@ -344,10 +388,34 @@ static void UserApp1SM_ChannelOpen(void)
   /* Always check for ANT messages */
   if( AntReadAppMessageBuffer() )
   {
-     /* New data message: check what it is */
-    if(G_eAntApiCurrentMessageClass == ANT_DATA)
-    {
-      UserApp1_u32DataMsgCount++;
+       /* New data message: check what it is */
+      if(G_eAntApiCurrentMessageClass == ANT_DATA)
+      {
+        UserApp1_u32DataMsgCount++;
+        bChannelOpen=TRUE;
+        
+      if(bChannelOpen)
+      {
+        u16IniTimeCounter++;
+      }
+      
+      if(u16IniTimeCounter==25)
+      {
+        LCDClearChars(LINE1_START_ADDR, 20); 
+        LCDClearChars(LINE2_START_ADDR, 20); 
+        u16IniTimeCounter=0;
+        bChannelOpen=FALSE;
+        bDisplayInitMessage=FALSE;
+        LCDMessage(LINE1_START_ADDR,"Feature 1");
+        LCDMessage(LINE2_START_ADDR,"Feature 2");
+      }
+      
+      if(bDisplayInitMessage)
+      {
+        LCDCommand(LCD_CLEAR_CMD);
+        LCDMessage(LINE1_START_ADDR, au8ParingMessage); 
+        LCDMessage(LINE2_START_ADDR, au8WelcomeMessage);
+      }
       
       /* We are synced with a device, so blue is solid */
       LedOff(GREEN);
@@ -371,8 +439,8 @@ static void UserApp1SM_ChannelOpen(void)
       {
         /* We got new data: show on LCD */
 #ifdef MPG1
-        LCDClearChars(LINE2_START_ADDR, 20); 
-        LCDMessage(LINE2_START_ADDR, au8DataContent); 
+       // LCDClearChars(LINE2_START_ADDR, 20); 
+       // LCDMessage(LINE2_START_ADDR, au8DataContent); 
 #endif /* MPG1 */    
     
 #ifdef MPG2
