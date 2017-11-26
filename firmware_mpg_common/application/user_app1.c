@@ -230,22 +230,21 @@ static void UserApp1SM_Idle(void)
 static void UserApp1SM_Scroll()
 {
    static u16 u16DisplayInterval=0;
-   u8 au8ScrollMessage[]="Sheng&He&Wang       ";
-   u8 au8MessageTemp[]=" ";
+   static u8 au8ScrollMessage[]="ShengandHeandWang   ";
    
    u16DisplayInterval++;
    
-   if(u16DisplayInterval==2000)
+   if(u16DisplayInterval==200)
    {
+    u16DisplayInterval=0;
     LCDCommand(LCD_CLEAR_CMD);
     LCDMessage(LINE1_START_ADDR, au8ScrollMessage); 
     
-    for(u8 u8index=0;u8index<19;u8index++)
+    for(u8 u8index=19;u8index>0;u8index--)
     {
-      au8MessageTemp[0]=au8ScrollMessage[19];
-      au8ScrollMessage[u8index+1]=au8ScrollMessage[u8index];
-      au8ScrollMessage[0]=au8MessageTemp[0];
+      au8ScrollMessage[u8index]=au8ScrollMessage[u8index-1];
     }
+    au8ScrollMessage[0]=au8ScrollMessage[19];
    } 
 }
 
