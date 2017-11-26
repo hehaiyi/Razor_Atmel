@@ -97,30 +97,8 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  u8 au8WelcomeMessage[] = "ANT SLAVE DEMO";
-  u8 au8Instructions[] = "B0 toggles radio";
   AntAssignChannelInfoType sAntSetupData;
   
-  /* Clear screen and place start messages */
-#ifdef EIE1
-  LCDCommand(LCD_CLEAR_CMD);
-  LCDMessage(LINE1_START_ADDR, au8WelcomeMessage); 
-  LCDMessage(LINE2_START_ADDR, au8Instructions); 
-
-  /* Start with LED0 in RED state = channel is not configured */
-  LedOn(RED);
-#endif /* EIE1 */
-  
-#ifdef MPG2
-  PixelAddressType sStringLocation = {LCD_SMALL_FONT_LINE0, LCD_LEFT_MOST_COLUMN}; 
-  LcdClearScreen();
-  LcdLoadString(au8WelcomeMessage, LCD_FONT_SMALL, &sStringLocation); 
-  sStringLocation.u16PixelRowAddress = LCD_SMALL_FONT_LINE1;
-  LcdLoadString(au8Instructions, LCD_FONT_SMALL, &sStringLocation); 
-  
-  /* Start with LED0 in RED state = channel is not configured */
-  LedOn(RED0);
-#endif /* MPG2 */
   
  /* Configure ANT for this application */
   sAntSetupData.AntChannel          = ANT_CHANNEL_USERAPP;
@@ -143,29 +121,12 @@ void UserApp1Initialize(void)
     
   /* If good initialization, set state to Idle */
   if( AntAssignChannel(&sAntSetupData) )
-  {
-    /* Channel assignment is queued so start timer */
-#ifdef EIE1
-    UserApp1_u32Timeout = G_u32SystemTime1ms;
-    LedOn(RED);
-#endif /* EIE1 */
-    
-#ifdef MPG2
-    LedOn(RED0);
-#endif /* MPG2 */
-    
+  {  
     UserApp1_StateMachine = UserApp1SM_WaitChannelAssign;
   }
   else
   {
     /* The task isn't properly initialized, so shut it down and don't run */
-#ifdef EIE1
-    LedBlink(RED, LED_4HZ);
-#endif /* EIE1 */
-    
-#ifdef MPG2
-    LedBlink(RED0, LED_4HZ);
-#endif /* MPG2 */
 
     UserApp1_StateMachine = UserApp1SM_Error;
   }
@@ -209,17 +170,7 @@ static void UserApp1SM_WaitChannelAssign(void)
 {
   /* Check if the channel assignment is complete */
   if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_CONFIGURED)
-  {
-#ifdef EIE1
-    LedOff(RED);
-    LedOn(YELLOW);
-#endif /* EIE1 */
-    
-#ifdef MPG2
-    LedOff(RED0);
-    LedOn(GREEN0);
-#endif /* MPG2 */
-
+  {  
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   
@@ -237,32 +188,80 @@ static void UserApp1SM_WaitChannelAssign(void)
 /* Wait for a message to be queued */
 static void UserApp1SM_Idle(void)
 {
-  /* Look for BUTTON 0 to open channel */
-  if(WasButtonPressed(BUTTON0))
-  {
-    /* Got the button, so complete one-time actions before next state */
-    ButtonAcknowledge(BUTTON0);
-    
-    /* Queue open channel and change LED0 from yellow to blinking green to indicate channel is opening */
-    AntOpenChannelNumber(ANT_CHANNEL_USERAPP);
+  u8 au8ParingMessage[]="Paring Completely";
+  u8 au8WelcomeMessage[]="Welcome";
+  static u16 u16IniTimeCounter=0;
+  static bool bChannelOpen=FALSE;
+  static bool bDisplayInitMessage=TRUE;
+  
+  LCDCommand(LCD_CLEAR_CMD);
 
-#ifdef MPG1
-    LedOff(YELLOW);
-    LedBlink(GREEN, LED_2HZ);
-#endif /* MPG1 */    
-    
-#ifdef MPG2
-    LedOff(RED0);
-    LedBlink(GREEN0, LED_2HZ);
-#endif /* MPG2 */
-    
-    /* Set timer and advance states */
-    UserApp1_u32Timeout = G_u32SystemTime1ms;
-    UserApp1_StateMachine = UserApp1SM_WaitChannelOpen;
+  
+  if( AntReadAppMessageBuffer())
+  {
+    if(G_eAntApiCurrentMessageClass == ANT_DATA)
+    {
+      bChannelOpen=TRUE;
+    }
   }
-    
+  
+  if(bChannelOpen)
+  {
+    u16IniTimeCounter++;
+  }
+  
+  if(u16IniTimeCounter==3000)
+  {
+    u16IniTimeCounter=0;
+    bChannelOpen=FALSE;
+    bDisplayInitMessage=FALSE;
+    //LCDMessage(LINE1_START_ADDR,"Feature 1")
+    //LCDMessage(LINE2_START_ADDR,"Feature 2")
+  }
+  
+  if(bDisplayInitMessage)
+  {
+    LCDCommand(LCD_CLEAR_CMD);
+    LCDMessage(LINE1_START_ADDR, au8ParingMessage); 
+    LCDMessage(LINE2_START_ADDR, au8WelcomeMessage);
+  }
+  
 } /* end UserApp1SM_Idle() */
      
+static void UserApp1SM_Scroll()
+{
+   static u16 u16DisplayInterval=0;
+   static u8 u8DisplayIndex=0;
+   static u8 u8MessageIndex=12;
+   u8 au8ScrollMessage[]="Sheng He Wang";
+   
+   u16DisplayInterval++;
+   
+   if(u16DisplayInterval==2000)
+   {
+    u8DisplayIndex++;
+    if(u8DisplayIndex==19)
+    {
+      u8DisplayIndex=0;
+    }
+    
+    LCDCommand(LCD_CLEAR_CMD);
+    LCDMessage(LINE1_START_ADDR+u8DisplayIndex, au8ScrollMessage);
+    
+    if(u8DisplayIndex==6)
+    {
+      LCDMessage(LINE1_START_ADDR-u8MessageIndex,au8ScrollMessage);
+      u8MessageIndex--;
+      if(u8MessageIndex==0)
+      {
+        u8MessageIndex=12;
+      }
+    }
+   }
+   
+   
+}
+
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for channel to open */
@@ -270,14 +269,7 @@ static void UserApp1SM_WaitChannelOpen(void)
 {
   /* Monitor the channel status to check if channel is opened */
   if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_OPEN)
-  {
-#ifdef MPG1
-    LedOn(GREEN);
-#endif /* MPG1 */    
-    
-#ifdef MPG2
-    LedOn(GREEN0);
-#endif /* MPG2 */
+  {   
     
     UserApp1_StateMachine = UserApp1SM_ChannelOpen;
   }
@@ -285,18 +277,7 @@ static void UserApp1SM_WaitChannelOpen(void)
   /* Check for timeout */
   if( IsTimeUp(&UserApp1_u32Timeout, TIMEOUT_VALUE) )
   {
-    AntCloseChannelNumber(ANT_CHANNEL_USERAPP);
-
-#ifdef MPG1
-    LedOff(GREEN);
-    LedOn(YELLOW);
-#endif /* MPG1 */    
-    
-#ifdef MPG2
-    LedOn(RED0);
-    LedOn(GREEN0);
-#endif /* MPG2 */
-    
+    AntCloseChannelNumber(ANT_CHANNEL_USERAPP);     
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
     
@@ -329,13 +310,7 @@ static void UserApp1SM_ChannelOpen(void)
     LedOff(BLUE);
     LedBlink(GREEN, LED_2HZ);
 #endif /* MPG1 */    
-    
-#ifdef MPG2
-    LedOff(RED0);
-    LedOff(BLUE0);
-    LedBlink(GREEN0, LED_2HZ);
-#endif /* MPG2 */
-    
+
     /* Set timer and advance states */
     UserApp1_u32Timeout = G_u32SystemTime1ms;
     UserApp1_StateMachine = UserApp1SM_WaitChannelClose;
@@ -374,11 +349,6 @@ static void UserApp1SM_ChannelOpen(void)
         LCDClearChars(LINE2_START_ADDR, 20); 
         LCDMessage(LINE2_START_ADDR, au8DataContent); 
 #endif /* MPG1 */    
-    
-#ifdef MPG2
-        PixelAddressType sStringLocation = {LCD_SMALL_FONT_LINE4, LCD_LEFT_MOST_COLUMN}; 
-        LcdLoadString(au8DataContent, LCD_FONT_SMALL, &sStringLocation); 
-#endif /* MPG2 */
 
         /* Update our local message counter and send the message back */
         au8TestMessage[7]++;
@@ -417,29 +387,6 @@ static void UserApp1SM_ChannelOpen(void)
         }
 #endif /* MPG1 */    
     
-#ifdef MPG2
-        if(G_au8AntApiCurrentMessageBytes[0] == 0xA5)
-        {
-          LedOff(RED3);
-          LedOff(GREEN3);
-          LedOff(BLUE3);
-          
-          if(G_au8AntApiCurrentMessageBytes[1] == 1)
-          {
-            LedOn(RED3);
-          }
-          
-          if(G_au8AntApiCurrentMessageBytes[2] == 1)
-          {
-            LedOn(GREEN3);
-          }
-
-          if(G_au8AntApiCurrentMessageBytes[3] == 1)
-          {
-            LedOn(BLUE3);
-          }
-        }
-#endif /* MPG2 */
       } /* end if(bGotNewData) */
     } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
     
@@ -475,23 +422,6 @@ static void UserApp1SM_ChannelOpen(void)
             break;
           }
 #endif /* MPG 1 */
-#ifdef MPG2
-          /* If we are paired but missing messages, blue blinks */
-          case EVENT_RX_FAIL:
-          {
-            LedOff(GREEN0);
-            LedBlink(BLUE0, LED_2HZ);
-            break;
-          }
-
-          /* If we drop to search, LED is green */
-          case EVENT_RX_FAIL_GO_TO_SEARCH:
-          {
-            LedOff(BLUE0);
-            LedOn(GREEN0);
-            break;
-          }
-#endif /* MPG 2 */
           /* If the search times out, the channel should automatically close */
           case EVENT_RX_SEARCH_TIMEOUT:
           {
@@ -523,11 +453,6 @@ static void UserApp1SM_ChannelOpen(void)
     LedBlink(GREEN, LED_2HZ);
     LedOff(BLUE);
 #endif /* MPG1 */
-
-#ifdef MPG2
-    LedBlink(GREEN0, LED_2HZ);
-    LedOff(BLUE0);
-#endif /* MPG2 */
     u8LastState = 0xff;
     
     UserApp1_u32Timeout = G_u32SystemTime1ms;
@@ -549,10 +474,6 @@ static void UserApp1SM_WaitChannelClose(void)
     LedOn(YELLOW);
 #endif /* MPG1 */
 
-#ifdef MPG2
-    LedOn(GREEN0);
-    LedOn(RED0);
-#endif /* MPG2 */
     UserApp1_StateMachine = UserApp1SM_Idle;
   }
   
@@ -564,11 +485,6 @@ static void UserApp1SM_WaitChannelClose(void)
     LedOff(YELLOW);
     LedBlink(RED, LED_4HZ);
 #endif /* MPG1 */
-
-#ifdef MPG2
-    LedBlink(RED0, LED_4HZ);
-    LedOff(GREEN0);
-#endif /* MPG2 */
     
     UserApp1_StateMachine = UserApp1SM_Error;
   }

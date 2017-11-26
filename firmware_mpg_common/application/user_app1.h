@@ -29,7 +29,7 @@ Type Definitions
 Constants / Definitions
 **********************************************************************************************************************/
 /* Required constants for ANT channel configuration */
-#define ANT_CHANNEL_USERAPP             ANT_CHANNEL_0         /* Channel 0 - 7 */
+#define ANT_CHANNEL_USERAPP             ANT_CHANNEL_1         /* Channel 0 - 7 */
 #define ANT_CHANNEL_TYPE_USERAPP        CHANNEL_TYPE_SLAVE    /* ANT SLAVE */
 #define ANT_DEVICEID_LO_USERAPP         (u8)0                 /* Low byte of two-byte Device # */
 #define ANT_DEVICEID_HI_USERAPP         (u8)0                 /* High byte of two-byte Device # */
@@ -75,6 +75,7 @@ static void UserApp1SM_Idle(void);
 static void UserApp1SM_WaitChannelOpen(void);
 static void UserApp1SM_ChannelOpen(void);
 static void UserApp1SM_WaitChannelClose(void);
+static void UserApp1SM_Scroll(void);
 
 static void UserApp1SM_Error(void);         
 static void UserApp1SM_FailedInit(void);        
