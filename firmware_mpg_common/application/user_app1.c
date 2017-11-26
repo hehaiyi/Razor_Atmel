@@ -171,7 +171,7 @@ static void UserApp1SM_WaitChannelAssign(void)
   /* Check if the channel assignment is complete */
   if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_CONFIGURED)
   {  
-    UserApp1_StateMachine = UserApp1SM_Idle;
+    UserApp1_StateMachine = UserApp1SM_WaitChannelOpen;
   }
   
   /* Monitor for timeout */
@@ -193,8 +193,6 @@ static void UserApp1SM_Idle(void)
   static u16 u16IniTimeCounter=0;
   static bool bChannelOpen=FALSE;
   static bool bDisplayInitMessage=TRUE;
-  
-  LCDCommand(LCD_CLEAR_CMD);
 
   
   if( AntReadAppMessageBuffer())
@@ -212,6 +210,7 @@ static void UserApp1SM_Idle(void)
   
   if(u16IniTimeCounter==3000)
   {
+    LCDCommand(LCD_CLEAR_CMD);
     u16IniTimeCounter=0;
     bChannelOpen=FALSE;
     bDisplayInitMessage=FALSE;
@@ -231,35 +230,23 @@ static void UserApp1SM_Idle(void)
 static void UserApp1SM_Scroll()
 {
    static u16 u16DisplayInterval=0;
-   static u8 u8DisplayIndex=0;
-   static u8 u8MessageIndex=12;
-   u8 au8ScrollMessage[]="Sheng He Wang";
+   u8 au8ScrollMessage[]="Sheng&He&Wang       ";
+   u8 au8MessageTemp[]=" ";
    
    u16DisplayInterval++;
    
    if(u16DisplayInterval==2000)
    {
-    u8DisplayIndex++;
-    if(u8DisplayIndex==19)
-    {
-      u8DisplayIndex=0;
-    }
-    
     LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE1_START_ADDR+u8DisplayIndex, au8ScrollMessage);
+    LCDMessage(LINE1_START_ADDR, au8ScrollMessage); 
     
-    if(u8DisplayIndex==6)
+    for(u8 u8index=0;u8index<19;u8index++)
     {
-      LCDMessage(LINE1_START_ADDR-u8MessageIndex,au8ScrollMessage);
-      u8MessageIndex--;
-      if(u8MessageIndex==0)
-      {
-        u8MessageIndex=12;
-      }
+      au8MessageTemp[0]=au8ScrollMessage[19];
+      au8ScrollMessage[u8index+1]=au8ScrollMessage[u8index];
+      au8ScrollMessage[0]=au8MessageTemp[0];
     }
-   }
-   
-   
+   } 
 }
 
 
@@ -271,7 +258,7 @@ static void UserApp1SM_WaitChannelOpen(void)
   if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_OPEN)
   {   
     
-    UserApp1_StateMachine = UserApp1SM_ChannelOpen;
+    UserApp1_StateMachine = UserApp1SM_Idle;
   }
   
   /* Check for timeout */
