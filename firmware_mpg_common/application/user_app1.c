@@ -136,10 +136,75 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
-  
+   static u8 au8TextData[4][5]={{'1','1','1','1','1'},{'2','2','2','2','2'},
+                               {'3','3','3','3','3'},{'4','4','4','4','4'}};
+   Display(au8TextData);
 } /* end UserApp1SM_Idle() */
+ 
+static void Display(u8 au8TextData[][5])
+{
+  static u8 au8MaxandMinHeartRate[]="Max:      |Min:      ";
+  static u8 au8TimeDispaly[]="Time:  H  M  S";
+  static u8 u8RowArrayIndex=0;
+  static u8 u8ColumnArrayIndex=0;
+  static u8 u8RateInforIndex=4;
+  static u8 u8TimeInforIndex=5;
+  static u8 u8InforCounter=0;
+  //static u8 au8TextData[4][5]={{'1','1','1','1','1'},{'2','2','2','2','2'},
+   //                             {'3','3','3','3','3'},{'4','4','4','4','4'}};
+  
+  if(WasButtonPressed(BUTTON0))
+  {
+    u8InforCounter=1;
+    ButtonAcknowledge(BUTTON0);
+    au8MaxandMinHeartRate[u8RateInforIndex]=au8TextData[u8RowArrayIndex][u8ColumnArrayIndex];
+    au8MaxandMinHeartRate[u8RateInforIndex+11]=au8TextData[u8RowArrayIndex][u8ColumnArrayIndex+1];
+    au8TimeDispaly[u8TimeInforIndex]=au8TextData[u8RowArrayIndex][u8ColumnArrayIndex+2];
+    au8TimeDispaly[u8TimeInforIndex+3]=au8TextData[u8RowArrayIndex][u8ColumnArrayIndex+3];
+    au8TimeDispaly[u8TimeInforIndex+6]=au8TextData[u8RowArrayIndex][u8ColumnArrayIndex+4];
+ 
+    LCDMessage(LINE1_START_ADDR,au8MaxandMinHeartRate);
+    LCDMessage(LINE2_START_ADDR,au8TimeDispaly);
+  }
+  
+  if(WasButtonPressed(BUTTON1))
+  {
+    ButtonAcknowledge(BUTTON1);
     
+    u8InforCounter++;
+    if(u8InforCounter>4)
+    {
+      u8InforCounter=4;
+    }
+    au8MaxandMinHeartRate[u8RateInforIndex]=au8TextData[u8RowArrayIndex+u8InforCounter-1][u8ColumnArrayIndex];
+    au8MaxandMinHeartRate[u8RateInforIndex+11]=au8TextData[u8RowArrayIndex+u8InforCounter-1][u8ColumnArrayIndex+1];
+    au8TimeDispaly[u8TimeInforIndex]=au8TextData[u8RowArrayIndex+u8InforCounter-1][u8ColumnArrayIndex+2];
+    au8TimeDispaly[u8TimeInforIndex+3]=au8TextData[u8RowArrayIndex+u8InforCounter-1][u8ColumnArrayIndex+3];
+    au8TimeDispaly[u8TimeInforIndex+6]=au8TextData[u8RowArrayIndex+u8InforCounter-1][u8ColumnArrayIndex+4];
+    
+    LCDMessage(LINE1_START_ADDR,au8MaxandMinHeartRate);
+    LCDMessage(LINE2_START_ADDR,au8TimeDispaly);
+  }
+  
+  if(WasButtonPressed(BUTTON2))
+  {
+    ButtonAcknowledge(BUTTON2);
+    
+    u8InforCounter--;
+    if(u8InforCounter<1)
+    {
+      u8InforCounter=1;
+    }
+    au8MaxandMinHeartRate[u8RateInforIndex]=au8TextData[u8RowArrayIndex+u8InforCounter-1][u8ColumnArrayIndex];
+    au8MaxandMinHeartRate[u8RateInforIndex+11]=au8TextData[u8RowArrayIndex+u8InforCounter-1][u8ColumnArrayIndex+1];
+    au8TimeDispaly[u8TimeInforIndex]=au8TextData[u8RowArrayIndex+u8InforCounter-1][u8ColumnArrayIndex+2];
+    au8TimeDispaly[u8TimeInforIndex+3]=au8TextData[u8RowArrayIndex+u8InforCounter-1][u8ColumnArrayIndex+3];
+    au8TimeDispaly[u8TimeInforIndex+6]=au8TextData[u8RowArrayIndex+u8InforCounter-1][u8ColumnArrayIndex+4];
+    
+    LCDMessage(LINE1_START_ADDR,au8MaxandMinHeartRate);
+    LCDMessage(LINE2_START_ADDR,au8TimeDispaly);    
+  }
+}
 #if 0
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
